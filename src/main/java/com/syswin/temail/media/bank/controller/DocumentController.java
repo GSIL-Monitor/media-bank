@@ -1,5 +1,6 @@
 package com.syswin.temail.media.bank.controller;
 
+import com.systoon.integration.spring.boot.disconf.common.annotation.RefreshScope;
 import com.syswin.temail.media.bank.constants.ResponseCodeConstants;
 import com.syswin.temail.media.bank.exception.DefineException;
 import com.syswin.temail.media.bank.service.DocumentService;
@@ -18,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +29,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Api(value="/", tags="文档处理接口")
 @RestController
+@RefreshScope
 public class DocumentController {
+
+    @Value("${url.office.convert}")
+    private String officeConvertUrl;
 
     @Autowired
     private DocumentService documentService;
@@ -54,7 +60,7 @@ public class DocumentController {
             if(StringUtils.isBlank(suffix)){
                 suffix = fileUrl.contains(".")?fileUrl.substring(fileUrl.lastIndexOf(".")):"";
             }
-            byte[] previewFile = documentService.preview(fileUrl, suffix, request);
+            byte[] previewFile = documentService.preview(officeConvertUrl, fileUrl, suffix, request);
             state = EnumStateAction.NORMAL;
             HttpHeaders headers = new HttpHeaders();
             headers.add("Accept-Ranges", "bytes");
