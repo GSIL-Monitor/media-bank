@@ -1,6 +1,7 @@
 package com.syswin.temail.media.bank.controller;
 
 import com.syswin.temail.media.bank.bean.Range;
+import com.syswin.temail.media.bank.bean.disconf.common.TemailAuthVerify;
 import com.syswin.temail.media.bank.constants.ResponseCodeConstants;
 import com.syswin.temail.media.bank.exception.DefineException;
 import com.syswin.temail.media.bank.service.FileService;
@@ -11,6 +12,7 @@ import com.syswin.temail.media.bank.utils.logs.EnumStateAction;
 import com.syswin.temail.media.bank.utils.logs.StorageLogDto;
 import com.syswin.temail.media.bank.utils.logs.StorageLogUtils;
 import com.syswin.temail.media.bank.utils.stoken.SecurityToken;
+import com.syswin.temail.media.bank.utils.stoken.StokenHelper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -45,9 +47,12 @@ public class FileController {
 	
 	@Autowired
 	private FileService fileService;
+
+	@Autowired
+	private TemailAuthVerify temailAuthVerify;
+
 	static final Logger logger = LoggerFactory.getLogger("async-info");
-	
-	
+
 	@ApiOperation(value = "文件直接上传", produces = "application/json;charset=UTF-8")
     @ApiImplicitParams({
     @ApiImplicitParam(required = false, name = "pub", paramType = "query", value = "文件公私有,公有为1,私有非1,默认公有", dataType = "int")
@@ -62,7 +67,6 @@ public class FileController {
 	public ResponseEntity<Map<String,Object>> uploadFile(@ApiParam(name = "file", value = "上传的文件", required = true) MultipartFile file
 			, @RequestParam(value = "pub",required = false,defaultValue = "1") Integer pub
 			, @RequestParam(value = "suffix",required=false) String suffix
-			, @RequestHeader (value = "stoken") String stoken
 			, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		SecurityToken securityToken = null;
 		EnumStateAction state = EnumStateAction.ERROR;
@@ -71,6 +75,10 @@ public class FileController {
 		long fileSize = 0;
 		String fileId = null;
 		try {
+			String stoken = request.getHeader("stoken");
+			if(!temailAuthVerify.verifySwitch){
+				stoken = StokenHelper.defaultStoken();
+			}
 			securityToken = new SecurityToken(stoken);
 			if(file == null || file.getSize() <= 0){
 				throw new DefineException(ResponseCodeConstants.PARAM_ERROR, "file size is error");
@@ -109,7 +117,6 @@ public class FileController {
 			,@RequestParam(value = "uuid") String uuid
 			,@RequestParam(value = "offset") Integer offset
 			,@RequestParam(value = "currentSize") Integer currentSize
-			,@RequestHeader (value = "stoken") String stoken
 			,HttpServletRequest request,HttpServletResponse response) throws Exception{
 		EnumStateAction state = EnumStateAction.ERROR;
 		long beginTime = System.currentTimeMillis();
@@ -122,6 +129,10 @@ public class FileController {
 				throw new DefineException(ResponseCodeConstants.PARAM_ERROR, "file size is error");
 			}
 			fileSize = file.getSize();
+			String stoken = request.getHeader("stoken");
+			if(!temailAuthVerify.verifySwitch){
+				stoken = StokenHelper.defaultStoken();
+			}
 			securityToken = new SecurityToken(stoken);
 			if(securityToken==null ||securityToken.getAppid()==0){
 				throw new DefineException(ResponseCodeConstants.PARAM_ERROR, "no userId found");

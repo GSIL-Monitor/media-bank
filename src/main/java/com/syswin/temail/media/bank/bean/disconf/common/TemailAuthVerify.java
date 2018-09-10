@@ -11,6 +11,9 @@ public class TemailAuthVerify {
   @Value("${url.temail.auth.verify}")
   public String url;
 
+  @Value("${stoken.auth.verify.switch}")
+  public boolean verifySwitch;
+
   public String getUrl() {
     return url;
   }
@@ -19,4 +22,11 @@ public class TemailAuthVerify {
     this.url = url;
   }
 
+  public boolean getVerifySwitch() {
+    return verifySwitch;
+  }
+
+  public void setVerifySwitch(boolean verifySwitch) {
+    this.verifySwitch = verifySwitch;
+  }
 }

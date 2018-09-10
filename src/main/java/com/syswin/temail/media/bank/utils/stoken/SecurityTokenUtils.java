@@ -61,12 +61,10 @@ public class SecurityTokenUtils {
 		return false;
 	}
 
-	public static SecurityTokenCheckResult checkSecurityToken(final HttpServletRequest request, int appId, String fileId, String authNeed, String secret)
+	public static SecurityTokenCheckResult checkSecurityToken(String stoken, int appId, String fileId, String authNeed, String secret)
 			throws UnsupportedEncodingException, InvalidKeyException, NoSuchAlgorithmException {
 		long ts = System.currentTimeMillis();
-		String stoken = request.getHeader("stoken");
 		SecurityTokenCheckResult r = new SecurityTokenCheckResult();
-
 		if(StringUtils.isBlank(stoken)) {
 			r.setPass(false);
 			r.setMsg("The token is empty!");

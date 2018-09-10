@@ -11,6 +11,7 @@ import com.syswin.temail.media.bank.utils.HttpClientUtils;
 import com.syswin.temail.media.bank.utils.stoken.SecurityToken;
 import com.syswin.temail.media.bank.utils.stoken.SecurityTokenCheckResult;
 import com.syswin.temail.media.bank.utils.stoken.SecurityTokenUtils;
+import com.syswin.temail.media.bank.utils.stoken.StokenHelper;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,16 +69,25 @@ public class AuthFilterConfig implements WebMvcConfigurer {
         String action = request.getRequestURI();
         // 只验证stoken
         String stoken = request.getHeader("stoken");
+        if(!temailAuthVerify.getVerifySwitch()){
+          stoken = StokenHelper.defaultStoken();
+        }
         if (action.equals("/uploadFile")) {
           if (checkTemailSignature(temailAuthVerify.getUrl(), request)) {
+            if(StringUtils.isBlank(stoken)){
+              throw new DefineException(ResponseCodeConstants.AUTO_ERROR, "please add stoken to header");
+            }
             SecurityToken securityToken = new SecurityToken(stoken);
-            return authCheck(request, stoken, securityToken.getAppid(), "");
+            return authCheck(stoken, securityToken.getAppid(), "");
           } else {
             return false;
           }
         }
         if (action.equals("/continueUpload")) {
           if (checkTemailSignature(temailAuthVerify.getUrl(), request)) {
+            if(StringUtils.isBlank(stoken)){
+              throw new DefineException(ResponseCodeConstants.AUTO_ERROR, "please add stoken to header");
+            }
             SecurityToken securityToken = new SecurityToken(stoken);
             int appId = securityToken.getAppid();
             String uuid = request.getParameter("uuid");
@@ -92,7 +102,7 @@ public class AuthFilterConfig implements WebMvcConfigurer {
               fileId = AESEncrypt.getInstance().encrypt(fileId);
               appId = fileService.getAppIdByFileId(fileId);
             }
-            return authCheck(request, stoken, appId, "");
+            return authCheck(stoken, appId, "");
           } else {
             return false;
           }
@@ -103,7 +113,7 @@ public class AuthFilterConfig implements WebMvcConfigurer {
           if (pub != 1) {
             response.setHeader("Cache-Control", "private");
             int appId = fileService.getAppIdByFileId(fileId);
-            return authCheck(request, stoken, appId, fileId);
+            return authCheck(stoken, appId, fileId);
           }
         }
       } catch (Exception e) {
@@ -144,12 +154,11 @@ public class AuthFilterConfig implements WebMvcConfigurer {
 
     /**
      *
-     * @param request
      * @param stoken
      * @param fileId
      * @throws Exception
      */
-    public boolean authCheck(HttpServletRequest request, String stoken, int appId, String fileId)
+    public boolean authCheck(String stoken, int appId, String fileId)
         throws Exception {
       if (StringUtils.isBlank(stoken)) {
         throw new DefineException(ResponseCodeConstants.AUTO_ERROR, "please add stoken to header");
@@ -162,7 +171,7 @@ public class AuthFilterConfig implements WebMvcConfigurer {
         throw new DefineException(ResponseCodeConstants.PARAM_ERROR, "appId invalid");
       }
       String secret = appInfo.getSecurity();
-      r = SecurityTokenUtils.checkSecurityToken(request, appId, fileId, authNeed, secret);
+      r = SecurityTokenUtils.checkSecurityToken(stoken, appId, fileId, authNeed, secret);
       if (r == null) {
         throw new DefineException(ResponseCodeConstants.FORBID_ACCESS_ERROR,
             "The token is a forgery!");
