@@ -7,8 +7,6 @@ import com.syswin.temail.media.bank.bean.AppInfo;
 import com.syswin.temail.media.bank.bean.disconf.common.AppInfoBean;
 import java.util.HashMap;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -18,7 +16,6 @@ public class AppInfoConfig {
 	private AppInfoBean appInfoBean;
 
 	public HashMap<String,AppInfo> getAppInfo() {
-		System.out.println("str:" + appInfoBean.getAppInfoMapStr());
 		Gson GSON = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
 		return  GSON.fromJson(appInfoBean.getAppInfoMapStr(), new TypeToken<HashMap<String,AppInfo>>(){}.getType());
 	}

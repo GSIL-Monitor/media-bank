@@ -224,7 +224,7 @@ public class StorageLogDto {
 
 	//增值服务日志初始化
 	public StorageLogDto(String action, long beginTime, String state, String tMark, HttpServletRequest request){
-		this.serverName = "storageApi";
+		this.serverName = "media-bank";
 		this.action = action;
 		this.beginTime = beginTime;
 		this.ip = getIpAddr(request);
