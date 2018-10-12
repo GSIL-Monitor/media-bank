@@ -5,6 +5,7 @@ import com.syswin.temail.media.bank.constants.ResponseCodeConstants;
 import com.syswin.temail.media.bank.exception.DefineException;
 import com.syswin.temail.media.bank.service.FileService;
 import com.syswin.temail.media.bank.utils.AESEncrypt;
+import com.syswin.temail.media.bank.utils.fastdfs.ProtoCommon;
 import com.syswin.temail.media.bank.utils.fastdfs.StorageClient1;
 import com.syswin.temail.media.bank.utils.fastdfs.TrackerClient;
 import com.syswin.temail.media.bank.utils.fastdfs.TrackerServer;
@@ -73,7 +74,6 @@ public class FileServiceImpl implements FileService {
     if (StringUtils.isBlank(suffix)) {
       suffix = fileName.contains(".") ? fileName.substring(fileName.lastIndexOf(".")) : "";
     }
-    String[] fileNames = fileName.split("\\.");
     Map<String, Object> resultMap = new HashMap<>();
     offset = currentSize + offset;
     long sysCurrentTime = System.currentTimeMillis();
@@ -92,7 +92,6 @@ public class FileServiceImpl implements FileService {
       if (offset > length) {
         throw new DefineException(ResponseCodeConstants.PARAM_ERROR, "file length error");
       }
-      String masterId = null;
       if (StringUtils.isNotBlank(uuid) && !uuid.equals("null")) {
         // 根据uuid解析出时间戳+加密fileId
         uuid = AESEncrypt.getInstance().decrypt(uuid);
@@ -101,8 +100,15 @@ public class FileServiceImpl implements FileService {
           throw new DefineException(ResponseCodeConstants.PARAM_ERROR, "file upload time error");
         }
         // 获取加密fileId，并进行解密
-        masterId = uuid.substring(13);
-        fileId = client1.upload_file1(masterId, fileNames[0], file.getBytes(), null, metaList);
+        fileId = uuid.substring(13);
+        int errno = client1.set_metadata1(fileId, metaList, ProtoCommon.STORAGE_SET_METADATA_FLAG_OVERWRITE);
+        if(errno != 0){
+          throw new DefineException(ResponseCodeConstants.SERVER_ERROR, "overwrite metadata error");
+        }
+        int appendErrno = client1.append_file1(fileId, file.getBytes());
+        if(appendErrno != 0){
+          throw new DefineException(ResponseCodeConstants.SERVER_ERROR, "append file error");
+        }
       } else {
         fileId = client1.upload_appender_file1(file.getBytes(), null, metaList);
       }
