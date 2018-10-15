@@ -6,14 +6,10 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
 @SpringBootApplication
-public class MediaBankApplication extends SpringBootServletInitializer {
+public class MediaBankApplication {
 
   public static void main(String[] args) {
     SpringApplication.run(MediaBankApplication.class, args);
   }
 
-  @Override
-  protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
-    return builder.sources(MediaBankApplication.class);
-  }
 }
