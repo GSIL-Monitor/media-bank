@@ -1,8 +1,8 @@
-package com.syswin.temail.media.bank.bean.disconf.fastdfs;
+package com.syswin.temail.media.bank.config;
 
 import com.baidu.disconf.client.common.annotations.DisconfUpdateService;
 import com.baidu.disconf.client.common.update.IDisconfUpdate;
-import com.syswin.temail.media.bank.utils.fastdfs.ClientGlobal;
+import org.csource.fastdfs.ClientGlobal;
 import org.springframework.stereotype.Component;
 
 @Component

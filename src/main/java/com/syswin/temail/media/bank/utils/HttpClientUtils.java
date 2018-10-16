@@ -107,7 +107,7 @@ public class HttpClientUtils {
                 if(jsonObject.getInteger("code") == ResponseCodeConstants.SUCCESS){
                     return true;
                 }else{
-                    throw new DefineException(ResponseCodeConstants.AUTO_ERROR, jsonObject.getString("message"));
+                    throw new DefineException(ResponseCodeConstants.AUTH_ERROR, jsonObject.getString("message"));
                 }
             } else {
                 logger.error("check signature error, response code:" + statusCode + ", reason:"+ result);

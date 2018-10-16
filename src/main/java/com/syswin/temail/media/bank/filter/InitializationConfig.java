@@ -1,6 +1,6 @@
 package com.syswin.temail.media.bank.filter;
 
-import com.syswin.temail.media.bank.utils.fastdfs.ClientGlobal;
+import org.csource.fastdfs.ClientGlobal;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 

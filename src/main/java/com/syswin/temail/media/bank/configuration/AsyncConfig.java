@@ -1,4 +1,4 @@
-package com.syswin.temail.media.bank.bean;
+package com.syswin.temail.media.bank.configuration;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;

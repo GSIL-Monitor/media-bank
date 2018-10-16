@@ -1,4 +1,4 @@
-package com.syswin.temail.media.bank.bean.disconf.common;
+package com.syswin.temail.media.bank.configuration;
 
 import javax.servlet.MultipartConfigElement;
 import org.springframework.beans.factory.annotation.Value;

@@ -1,18 +1,18 @@
 package com.syswin.temail.media.bank.service.fastdfs;
 
-import com.syswin.temail.media.bank.common.NameValuePair;
 import com.syswin.temail.media.bank.constants.ResponseCodeConstants;
 import com.syswin.temail.media.bank.exception.DefineException;
 import com.syswin.temail.media.bank.service.FileService;
 import com.syswin.temail.media.bank.utils.AESEncrypt;
-import com.syswin.temail.media.bank.utils.fastdfs.ProtoCommon;
-import com.syswin.temail.media.bank.utils.fastdfs.StorageClient1;
-import com.syswin.temail.media.bank.utils.fastdfs.TrackerClient;
-import com.syswin.temail.media.bank.utils.fastdfs.TrackerServer;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
+import org.csource.common.NameValuePair;
+import org.csource.fastdfs.ProtoCommon;
+import org.csource.fastdfs.StorageClient1;
+import org.csource.fastdfs.TrackerClient;
+import org.csource.fastdfs.TrackerServer;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 

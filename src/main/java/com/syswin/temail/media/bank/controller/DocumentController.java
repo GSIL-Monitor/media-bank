@@ -54,9 +54,7 @@ public class DocumentController {
         long beginTime = System.currentTimeMillis();
         EnumStateAction state = EnumStateAction.ERROR;
         try {
-            if(!HttpClientUtils.checkUrl(fileUrl)){
-                throw new DefineException(ResponseCodeConstants.PARAM_ERROR, "fileUrl error");
-            }
+            checkUrl(fileUrl);
             if(StringUtils.isBlank(suffix)){
                 suffix = fileUrl.contains(".")?fileUrl.substring(fileUrl.lastIndexOf(".")):"";
             }
@@ -70,6 +68,12 @@ public class DocumentController {
         } finally {
             StorageLogUtils.logAction(new StorageLogDto(EnumLogAction.previewByUrl.getCode(), beginTime,
                     state.getCode(), response.getHeader("tMark"), request));
+        }
+    }
+
+    private void checkUrl(@RequestParam String fileUrl) throws DefineException {
+        if(!HttpClientUtils.checkUrl(fileUrl)){
+            throw new DefineException(ResponseCodeConstants.PARAM_ERROR, "fileUrl error");
         }
     }
 

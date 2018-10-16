@@ -1,4 +1,4 @@
-package com.syswin.temail.media.bank.bean.disconf.common;
+package com.syswin.temail.media.bank.config;
 
 import com.systoon.integration.spring.boot.disconf.common.annotation.RefreshScope;
 import org.springframework.beans.factory.annotation.Value;

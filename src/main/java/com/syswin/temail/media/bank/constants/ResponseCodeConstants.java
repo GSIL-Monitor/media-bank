@@ -18,7 +18,7 @@ public class ResponseCodeConstants {
 	 * 
 	 * 无权限访问服务器
 	 */
-	public static final int AUTO_ERROR = 401;
+	public static final int AUTH_ERROR = 401;
 
 	/**
 	 * 

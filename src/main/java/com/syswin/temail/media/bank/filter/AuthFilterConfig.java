@@ -2,7 +2,8 @@ package com.syswin.temail.media.bank.filter;
 
 import com.alibaba.fastjson.JSONObject;
 import com.syswin.temail.media.bank.bean.AppInfo;
-import com.syswin.temail.media.bank.bean.disconf.common.TemailAuthVerify;
+import com.syswin.temail.media.bank.config.AppInfoBean;
+import com.syswin.temail.media.bank.config.TemailAuthVerify;
 import com.syswin.temail.media.bank.constants.ResponseCodeConstants;
 import com.syswin.temail.media.bank.exception.DefineException;
 import com.syswin.temail.media.bank.service.FileService;
@@ -50,7 +51,7 @@ public class AuthFilterConfig implements WebMvcConfigurer {
   public class AuthInterceptor implements HandlerInterceptor {
 
     @Autowired
-    private AppInfoConfig appInfoConfig;
+    private AppInfoBean appInfoConfig;
 
     @Autowired
     private FileService fileService;
@@ -75,7 +76,7 @@ public class AuthFilterConfig implements WebMvcConfigurer {
         if (action.equals("/uploadFile")) {
           if (checkTemailSignature(temailAuthVerify.getUrl(), request)) {
             if(StringUtils.isBlank(stoken)){
-              throw new DefineException(ResponseCodeConstants.AUTO_ERROR, "please add stoken to header");
+              throw new DefineException(ResponseCodeConstants.AUTH_ERROR, "please add stoken to header");
             }
             SecurityToken securityToken = new SecurityToken(stoken);
             return authCheck(stoken, securityToken.getAppid(), "");
@@ -86,7 +87,7 @@ public class AuthFilterConfig implements WebMvcConfigurer {
         if (action.equals("/continueUpload")) {
           if (checkTemailSignature(temailAuthVerify.getUrl(), request)) {
             if(StringUtils.isBlank(stoken)){
-              throw new DefineException(ResponseCodeConstants.AUTO_ERROR, "please add stoken to header");
+              throw new DefineException(ResponseCodeConstants.AUTH_ERROR, "please add stoken to header");
             }
             SecurityToken securityToken = new SecurityToken(stoken);
             int appId = securityToken.getAppid();
@@ -161,7 +162,7 @@ public class AuthFilterConfig implements WebMvcConfigurer {
     public boolean authCheck(String stoken, int appId, String fileId)
         throws Exception {
       if (StringUtils.isBlank(stoken)) {
-        throw new DefineException(ResponseCodeConstants.AUTO_ERROR, "please add stoken to header");
+        throw new DefineException(ResponseCodeConstants.AUTH_ERROR, "please add stoken to header");
       }
       SecurityToken securityToken = new SecurityToken(stoken);
       String authNeed = "w";

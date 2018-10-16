@@ -1,7 +1,7 @@
 package com.syswin.temail.media.bank.controller;
 
 import com.syswin.temail.media.bank.bean.Range;
-import com.syswin.temail.media.bank.bean.disconf.common.TemailAuthVerify;
+import com.syswin.temail.media.bank.config.TemailAuthVerify;
 import com.syswin.temail.media.bank.constants.ResponseCodeConstants;
 import com.syswin.temail.media.bank.exception.DefineException;
 import com.syswin.temail.media.bank.service.FileService;
@@ -23,7 +23,6 @@ import io.swagger.annotations.ApiResponses;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -84,9 +83,7 @@ public class FileController {
         stoken = StokenHelper.defaultStoken();
       }
       securityToken = new SecurityToken(stoken);
-      if (file == null || file.getSize() <= 0) {
-        throw new DefineException(ResponseCodeConstants.PARAM_ERROR, "file size is error");
-      }
+      checkStoken(file == null, file.getSize() <= 0, "file size is error");
       fileSize = file.getSize();
       String domain = HttpClientUtils.getDomainByUrl("uploadFile", request);
       resultMap = fileService.uploadFile(file, pub, suffix, securityToken.getAppid(), domain);
@@ -135,18 +132,14 @@ public class FileController {
     long fileSize = 0;
     String fileId = null;
     try {
-      if (file == null || file.getSize() <= 0) {
-        throw new DefineException(ResponseCodeConstants.PARAM_ERROR, "file size is error");
-      }
+      checkStoken(file == null, file.getSize() <= 0, "file size is error");
       fileSize = file.getSize();
       String stoken = request.getHeader("stoken");
       if (!temailAuthVerify.verifySwitch) {
         stoken = StokenHelper.defaultStoken();
       }
       securityToken = new SecurityToken(stoken);
-      if (securityToken == null || securityToken.getAppid() == 0) {
-        throw new DefineException(ResponseCodeConstants.PARAM_ERROR, "no userId found");
-      }
+      checkStoken(securityToken == null, securityToken.getAppid() == 0, "no userId found");
       String domain = HttpClientUtils.getDomainByUrl("continueUpload", request);
       continueUpload = fileService
           .continueUpload(file, pub, suffix, length, uuid, offset, currentSize,
@@ -158,6 +151,12 @@ public class FileController {
       StorageLogUtils.logAction(new StorageLogDto(EnumLogAction.continueUpload.getCode(), beginTime,
           fileSize, fileId, securityToken.getAppid(), state.getCode(), response.getHeader("tMark"),
           request));
+    }
+  }
+
+  private void checkStoken(boolean b, boolean b2, String s) throws DefineException {
+    if (b || b2) {
+      throw new DefineException(ResponseCodeConstants.PARAM_ERROR, s);
     }
   }
 
@@ -190,9 +189,9 @@ public class FileController {
       userId = (Integer) resultMap.get("userId");
       //String contentType = (String)resultMap.get("contentType");
       String contentType = HttpContentTypeUtils.getMineType(suffix);
-      byte[] dowmloadFile = (byte[]) resultMap.get("file");
-      length = dowmloadFile.length;
-      in = new ByteArrayInputStream(dowmloadFile);
+      byte[] downloadFile = (byte[]) resultMap.get("file");
+      length = downloadFile.length;
+      in = new ByteArrayInputStream(downloadFile);
       String rangeHeader = request.getHeader("Range");
       if (!StringUtils.isBlank(rangeHeader)) {
         Range range = new Range(rangeHeader);
@@ -225,6 +224,7 @@ public class FileController {
           outputSream.flush();
           outputSream.close();
           in.close();
+          //TODO
         } else {
           response.setStatus(416);
         }
