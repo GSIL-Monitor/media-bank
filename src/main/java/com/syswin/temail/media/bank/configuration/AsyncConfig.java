@@ -12,22 +12,22 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @EnableAsync
 public class AsyncConfig {
 
-    @Value("${image.pool.core.size}")
+    @Value("${app.mediabank.image.pool.core.size}")
     private int imageCorePoolSize;
 
-    @Value("${image.pool.max.size}")
+    @Value("${app.mediabank.image.pool.max.size}")
     private int imageMaxPoolSize;
 
-    @Value("${image.pool.queue.capacity}")
+    @Value("${app.mediabank.image.pool.queue.capacity}")
     private int imageQueueCapacity;
 
-    @Value("${video.pool.core.size}")
+    @Value("${app.mediabank.video.pool.core.size}")
     private int videoCorePoolSize;
 
-    @Value("${video.pool.max.size}")
+    @Value("${app.mediabank.video.pool.max.size}")
     private int videoMaxPoolSize;
 
-    @Value("${video.pool.queue.capacity}")
+    @Value("${app.mediabank.video.pool.queue.capacity}")
     private int videoQueueCapacity;
 
     @Bean(name = "imageExecutor")
