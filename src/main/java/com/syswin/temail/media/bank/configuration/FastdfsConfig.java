@@ -1,11 +1,11 @@
-package com.syswin.temail.media.bank.filter;
+package com.syswin.temail.media.bank.configuration;
 
 import org.csource.fastdfs.ClientGlobal;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
-public class InitializationConfig implements InitializingBean {
+@Component
+public class FastdfsConfig implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {

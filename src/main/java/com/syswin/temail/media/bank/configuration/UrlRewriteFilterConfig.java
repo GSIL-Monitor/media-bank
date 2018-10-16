@@ -1,4 +1,4 @@
-package com.syswin.temail.media.bank.filter;
+package com.syswin.temail.media.bank.configuration;
 
 import java.io.IOException;
 import javax.servlet.FilterConfig;
