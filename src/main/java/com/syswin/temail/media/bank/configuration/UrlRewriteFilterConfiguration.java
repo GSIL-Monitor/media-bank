@@ -10,7 +10,7 @@ import org.tuckey.web.filters.urlrewrite.Conf;
 import org.tuckey.web.filters.urlrewrite.UrlRewriteFilter;
 
 @Configuration
-public class UrlRewriteFilterConfig extends UrlRewriteFilter {
+public class UrlRewriteFilterConfiguration extends UrlRewriteFilter {
 
     private static final String URL_REWRITE = "classpath:/urlrewrite.xml";
 

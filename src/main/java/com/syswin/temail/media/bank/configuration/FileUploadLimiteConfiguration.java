@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class FileUploadLimite {
+public class FileUploadLimiteConfiguration {
 
   @Value("${spring.servlet.multipart.max-file-size}")
   private String maxFileSize;

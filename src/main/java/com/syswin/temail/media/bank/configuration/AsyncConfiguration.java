@@ -10,7 +10,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 @Configuration
 @EnableAsync
-public class AsyncConfig {
+public class AsyncConfiguration {
 
     @Value("${app.mediabank.image.pool.core.size}")
     private int imageCorePoolSize;
