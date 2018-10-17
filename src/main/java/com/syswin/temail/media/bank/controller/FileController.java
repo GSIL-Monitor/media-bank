@@ -206,6 +206,8 @@ public class FileController {
           response.setHeader("Content-Range",
               "bytes " + range.getPos() + "-" + (range.getEnd()) + "/" + length);
           response.setStatus(206);
+          response.addHeader("Content-FileSize", ""+contentLength);
+          response.setContentLength(contentLength);
           try (OutputStream outputSream = response.getOutputStream()) {
             outputSream.write(downloadFile, range.getPos(), contentLength);
           }
