@@ -2,8 +2,8 @@ package com.syswin.temail.media.bank.bean;
 
 public class Range {
 
-  private Long pos = 0l;
-  private Long end = 0l;
+  private int pos = 0;
+  private int end = 0;
   private boolean isRange = true;
 
   public Range(String Range) {
@@ -12,28 +12,28 @@ public class Range {
     }
     try {
       String[] tmpStr = Range.replaceAll("bytes=", "").split("-");
-      pos = Long.parseLong(tmpStr[0]);
+      pos = Integer.parseInt(tmpStr[0]);
       if (tmpStr.length > 1) {
-        end = Long.parseLong(tmpStr[1]);
+        end = Integer.parseInt(tmpStr[1]);
       }
     } catch (NumberFormatException e) {
       isRange = false;
     }
   }
 
-  public Long getPos() {
+  public int getPos() {
     return pos;
   }
 
-  public void setPos(Long pos) {
+  public void setPos(int pos) {
     this.pos = pos;
   }
 
-  public Long getEnd() {
+  public int getEnd() {
     return end;
   }
 
-  public void setEnd(Long end) {
+  public void setEnd(int end) {
     this.end = end;
   }
 
@@ -41,7 +41,16 @@ public class Range {
     return isRange;
   }
 
-  public void setRange(boolean isRange) {
-    this.isRange = isRange;
+  public void setRange(boolean range) {
+    isRange = range;
+  }
+
+  @Override
+  public String toString() {
+    return "Range{" +
+        "pos=" + pos +
+        ", end=" + end +
+        ", isRange=" + isRange +
+        '}';
   }
 }
