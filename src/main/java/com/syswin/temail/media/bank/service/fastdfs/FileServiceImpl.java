@@ -13,15 +13,19 @@ import org.csource.fastdfs.ProtoCommon;
 import org.csource.fastdfs.StorageClient1;
 import org.csource.fastdfs.TrackerClient;
 import org.csource.fastdfs.TrackerServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class FileServiceImpl implements FileService {
 
+  private static final Logger logger = LoggerFactory.getLogger(FileServiceImpl.class);
+
   @Override
   public Map<String, Object> uploadFile(MultipartFile file, Integer pub, String suffix, int userId,
-      String domain) throws Exception {
+      String domain) {
     Map<String, Object> resultMap = new HashMap<>();
     String fileName = file.getOriginalFilename();
     if (StringUtils.isBlank(suffix)) {
@@ -46,13 +50,14 @@ public class FileServiceImpl implements FileService {
             "file upload error,error code: " + client1.getErrorCode());
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.error("uploadFile error fileName={}", fileName, e);
+      throw new DefineException("uploadFile exception", e);
     } finally {
       if (trackerServer != null) {
         try {
           trackerServer.close();
         } catch (IOException e) {
-          e.printStackTrace();
+          logger.warn("trackerServer.close warn", e);
         }
       }
     }
@@ -65,11 +70,9 @@ public class FileServiceImpl implements FileService {
   @Override
   public Map<String, Object> continueUpload(MultipartFile file, Integer pub, String suffix,
       Integer length,
-      String uuid, Integer offset, Integer currentSize, int userId, String domain)
-      throws Exception {
+      String uuid, Integer offset, Integer currentSize, int userId, String domain) {
     String fileId = null;
     String puburl = null;
-    TrackerServer trackerServer = null;
     String fileName = file.getOriginalFilename();
     if (StringUtils.isBlank(suffix)) {
       suffix = fileName.contains(".") ? fileName.substring(fileName.lastIndexOf(".")) : "";
@@ -77,6 +80,10 @@ public class FileServiceImpl implements FileService {
     Map<String, Object> resultMap = new HashMap<>();
     offset = currentSize + offset;
     long sysCurrentTime = System.currentTimeMillis();
+    if (offset > length) {
+      throw new DefineException(ResponseCodeConstants.PARAM_ERROR, "file length error");
+    }
+    TrackerServer trackerServer = null;
     try {
       TrackerClient tracker = new TrackerClient();
       trackerServer = tracker.getConnection();
@@ -89,9 +96,6 @@ public class FileServiceImpl implements FileService {
       metaList[4] = new NameValuePair("offset", offset.toString());
       metaList[5] = new NameValuePair("userId", userId + "");
 
-      if (offset > length) {
-        throw new DefineException(ResponseCodeConstants.PARAM_ERROR, "file length error");
-      }
       if (StringUtils.isNotBlank(uuid) && !uuid.equals("null")) {
         // 根据uuid解析出时间戳+加密fileId
         uuid = AESEncrypt.getInstance().decrypt(uuid);
@@ -102,11 +106,11 @@ public class FileServiceImpl implements FileService {
         // 获取加密fileId，并进行解密
         fileId = uuid.substring(13);
         int errno = client1.set_metadata1(fileId, metaList, ProtoCommon.STORAGE_SET_METADATA_FLAG_OVERWRITE);
-        if(errno != 0){
+        if (errno != 0) {
           throw new DefineException(ResponseCodeConstants.SERVER_ERROR, "overwrite metadata error");
         }
         int appendErrno = client1.append_file1(fileId, file.getBytes());
-        if(appendErrno != 0){
+        if (appendErrno != 0) {
           throw new DefineException(ResponseCodeConstants.SERVER_ERROR, "append file error");
         }
       } else {
@@ -129,16 +133,22 @@ public class FileServiceImpl implements FileService {
       resultMap.put("pubUrl", puburl);
 
       return resultMap;
+    } catch (Exception e) {
+      logger.error("continueUpload error fileName={}", fileName, e);
+      throw new DefineException("continueUpload exception", e);
     } finally {
       if (trackerServer != null) {
-        trackerServer.close();
+        try {
+          trackerServer.close();
+        } catch (IOException e) {
+          logger.warn("trackerServer.close warn", e);
+        }
       }
     }
-
   }
 
   @Override
-  public Map<String, Object> downloadFile(String fileId, String suffix) throws Exception {
+  public Map<String, Object> downloadFile(String fileId, String suffix) {
     Map<String, Object> resultMap = new HashMap<>(4);
     if (fileId.contains(".")) {
       String[] split = fileId.split("\\.");
@@ -180,15 +190,22 @@ public class FileServiceImpl implements FileService {
       resultMap.put("length", length);
       resultMap.put("contentType", contentType);
       return resultMap;
+    } catch (Exception e) {
+      logger.error("downloadFile error fileName={}", fileId, e);
+      throw new DefineException("downloadFile exception", e);
     } finally {
       if (trackerServer != null) {
-        trackerServer.close();
+        try {
+          trackerServer.close();
+        } catch (IOException e) {
+          logger.warn("trackerServer.close warn", e);
+        }
       }
     }
   }
 
   @Override
-  public int getPubByFileId(String fileId) throws Exception {
+  public int getPubByFileId(String fileId) {
     TrackerServer trackerServer = null;
     try {
       String pub = "1";
@@ -207,16 +224,21 @@ public class FileServiceImpl implements FileService {
       }
       return Integer.parseInt(pub);
     } catch (Exception e) {
-      throw new Exception("pub not found");
+      logger.error("getPubByFileId error fileName={}", fileId, e);
+      throw new DefineException("getPubByFileId exception", e);
     } finally {
       if (trackerServer != null) {
-        trackerServer.close();
+        try {
+          trackerServer.close();
+        } catch (IOException e) {
+          logger.warn("trackerServer.close warn", e);
+        }
       }
     }
   }
 
   @Override
-  public int getAppIdByFileId(String fileId) throws Exception {
+  public int getAppIdByFileId(String fileId) {
     TrackerServer trackerServer = null;
     try {
       String appId = "0";
@@ -235,10 +257,15 @@ public class FileServiceImpl implements FileService {
       }
       return Integer.parseInt(appId);
     } catch (Exception e) {
-      throw new Exception("appId not found");
+      logger.error("getAppIdByFileId error fileName={}", fileId, e);
+      throw new DefineException("getAppIdByFileId exception", e);
     } finally {
       if (trackerServer != null) {
-        trackerServer.close();
+        try {
+          trackerServer.close();
+        } catch (IOException e) {
+          logger.warn("trackerServer.close warn", e);
+        }
       }
     }
   }

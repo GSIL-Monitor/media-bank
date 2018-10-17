@@ -20,13 +20,10 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,13 +40,14 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 public class FileController {
 
+  private static final Logger logger = LoggerFactory.getLogger(FileController.class);
+
   @Autowired
   private FileService fileService;
 
   @Autowired
   private TemailAuthVerify temailAuthVerify;
 
-  static final Logger logger = LoggerFactory.getLogger("async-info");
 
   @ApiOperation(value = "文件直接上传", produces = "application/json;charset=UTF-8")
   @ApiImplicitParams({
@@ -74,7 +72,6 @@ public class FileController {
     SecurityToken securityToken = null;
     EnumStateAction state = EnumStateAction.ERROR;
     long beginTime = System.currentTimeMillis();
-    Map<String, Object> resultMap = null;
     long fileSize = 0;
     String fileId = null;
     try {
@@ -86,7 +83,7 @@ public class FileController {
       checkParam(file == null, file.getSize() <= 0, "file size is error");
       fileSize = file.getSize();
       String domain = HttpClientUtils.getDomainByUrl("uploadFile", request);
-      resultMap = fileService.uploadFile(file, pub, suffix, securityToken.getAppid(), domain);
+      Map<String, Object> resultMap = fileService.uploadFile(file, pub, suffix, securityToken.getAppid(), domain);
       fileId = (String) resultMap.get("fileId");
       state = EnumStateAction.NORMAL;
       return new ResponseEntity<>(resultMap, HttpStatus.OK);

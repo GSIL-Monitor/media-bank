@@ -11,7 +11,7 @@ public class TemailAuthVerify {
   @Value("${url.temail.auth.verify}")
   public String url;
 
-  @Value("${stoken.auth.verify.switch}")
+  @Value("${app.mediabank.stoken.auth.verify.switch}")
   public boolean verifySwitch;
 
   public String getUrl() {
