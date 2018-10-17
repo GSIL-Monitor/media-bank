@@ -11,11 +11,11 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 @Component
-@PropertySource("classpath:appInfo.properties")
+//@PropertySource("classpath:appInfo.properties")
 @RefreshScope
 public class AppInfoBean {
 
-    @Value("${appInfoMapStr}")
+    @Value("${app.mediabank.appInfoMapStr}")
     private String appInfoMapStr;
 
     public String getAppInfoMapStr() {
