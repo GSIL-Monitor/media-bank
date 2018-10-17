@@ -64,6 +64,8 @@ public class AuthFilterConfig implements WebMvcConfigurer {
         Object handler)
         throws Exception {
       response.setHeader("Cache-Control", "public");
+      response.setHeader("Access-Control-Allow-Headers", "*");
+      response.setHeader("Access-Control-Allow-Origin", "*");
       response.setHeader("tMark", getTMark(request));
       OutputStream out = null;
       try {
