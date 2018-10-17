@@ -20,6 +20,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
@@ -68,7 +69,7 @@ public class FileController {
       @ApiParam(name = "file", value = "上传的文件", required = true) MultipartFile file
       , @RequestParam(value = "pub", required = false, defaultValue = "1") Integer pub
       , @RequestParam(value = "suffix", required = false) String suffix
-      , HttpServletRequest request, HttpServletResponse response) throws Exception {
+      , HttpServletRequest request, HttpServletResponse response) {
     SecurityToken securityToken = null;
     EnumStateAction state = EnumStateAction.ERROR;
     long beginTime = System.currentTimeMillis();
@@ -121,7 +122,7 @@ public class FileController {
       , @RequestParam(value = "uuid") String uuid
       , @RequestParam(value = "offset") Integer offset
       , @RequestParam(value = "currentSize") Integer currentSize
-      , HttpServletRequest request, HttpServletResponse response) throws Exception {
+      , HttpServletRequest request, HttpServletResponse response) {
     EnumStateAction state = EnumStateAction.ERROR;
     long beginTime = System.currentTimeMillis();
     SecurityToken securityToken = null;
@@ -170,8 +171,7 @@ public class FileController {
   @RequestMapping(value = "downloadFile", method = RequestMethod.GET)
   public void downloadFile(@RequestParam("fileId") String fileId,
       @RequestParam(value = "suffix", required = false)
-          String suffix, HttpServletRequest request, HttpServletResponse response)
-      throws Exception {
+          String suffix, HttpServletRequest request, HttpServletResponse response) {
     Map<String, Object> resultMap;
     long beginTime = System.currentTimeMillis();
     Integer userId = 0;
@@ -205,6 +205,9 @@ public class FileController {
           response.setContentLength(contentLength);
           try (OutputStream outputSream = response.getOutputStream()) {
             outputSream.write(downloadFile, range.getPos(), contentLength);
+          } catch (IOException e) {
+            logger.error("downloadFile range exception", e);
+            throw new DefineException("downloadFile range exception", e);
           }
         } else {
           response.setStatus(416);
@@ -214,6 +217,9 @@ public class FileController {
         response.setContentLength(length);
         try (OutputStream outputSream = response.getOutputStream()) {
           outputSream.write(downloadFile);
+        } catch (IOException e) {
+          logger.error("downloadFile exception", e);
+          throw new DefineException("downloadFile exception", e);
         }
       }
       state = EnumStateAction.NORMAL;

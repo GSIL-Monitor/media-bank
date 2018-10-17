@@ -71,7 +71,7 @@ public class FileServiceImpl implements FileService {
   public Map<String, Object> continueUpload(MultipartFile file, Integer pub, String suffix,
       Integer length,
       String uuid, Integer offset, Integer currentSize, int userId, String domain) {
-    String fileId = null;
+    String fileId;
     String puburl = null;
     String fileName = file.getOriginalFilename();
     if (StringUtils.isBlank(suffix)) {
@@ -191,7 +191,7 @@ public class FileServiceImpl implements FileService {
       resultMap.put("contentType", contentType);
       return resultMap;
     } catch (Exception e) {
-      logger.error("downloadFile error fileName={}", fileId, e);
+      logger.error("downloadFile error fileId={}", fileId, e);
       throw new DefineException("downloadFile exception", e);
     } finally {
       if (trackerServer != null) {
