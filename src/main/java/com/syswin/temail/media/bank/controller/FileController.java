@@ -187,8 +187,6 @@ public class FileController {
       byte[] downloadFile = (byte[]) resultMap.get("file");
       length = downloadFile.length;
 
-      response.setContentLength((int) length);
-      response.addHeader("Content-FileSize", String.valueOf(length));
       response.addHeader("Accept-Ranges", "bytes");
       response.addHeader("Content-Transfer-Encoding", "binary");
       response.addHeader("Access-Control-Allow-Origin", "*");
@@ -202,11 +200,11 @@ public class FileController {
           if (range.getEnd() == 0) {
             range.setEnd(length - 1);
           }
-          int contentLength = (int) (range.getEnd() - range.getPos() + 1);
+          int contentLength = range.getEnd() - range.getPos() + 1;
           response.setHeader("Content-Range",
               "bytes " + range.getPos() + "-" + (range.getEnd()) + "/" + length);
           response.setStatus(206);
-          response.addHeader("Content-FileSize", ""+contentLength);
+          response.addHeader("Content-FileSize", "" + contentLength);
           response.setContentLength(contentLength);
           try (OutputStream outputSream = response.getOutputStream()) {
             outputSream.write(downloadFile, range.getPos(), contentLength);
@@ -215,6 +213,8 @@ public class FileController {
           response.setStatus(416);
         }
       } else {
+        response.addHeader("Content-FileSize", String.valueOf(length));
+        response.setContentLength(length);
         try (OutputStream outputSream = response.getOutputStream()) {
           outputSream.write(downloadFile);
         }
