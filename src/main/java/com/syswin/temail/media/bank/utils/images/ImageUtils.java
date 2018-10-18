@@ -60,10 +60,11 @@ public class ImageUtils {
                 byte[] arr = null;
                 //如果是gif，先抽出第一张图片
                 if (sourceType.equalsIgnoreCase("gif")) {
-                    src = cutGif(src);
-                    if (src == null || src.length == 0) {
+                    arr = cutGif(src);
+                    if (arr == null || arr.length == 0) {
                         return src;
                     }
+                    src = arr;
                 }
                 //转换成目标格式
                 arr = convertImageByGm(src, format);
