@@ -205,7 +205,6 @@
         <configuration>
           <excludes>
             <exclude>**/application.properties</exclude>
-            <exclude>**/appInfo.properties</exclude>
             <exclude>**/fastdfs-client.properties</exclude>
           </excludes>
         </configuration>

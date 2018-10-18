@@ -36,7 +36,7 @@ public class SwaggerFilterConfiguration {
 
     private ApiInfo apiInfo() {
         ApiInfo apiInfo = new ApiInfo(
-                "StorageAPI REST API",
+                "MediaBank REST API",
                 "",
                 "version 1.0",
                 "",

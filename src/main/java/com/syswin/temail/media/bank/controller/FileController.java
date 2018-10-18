@@ -186,7 +186,6 @@ public class FileController {
 
       response.addHeader("Accept-Ranges", "bytes");
       response.addHeader("Content-Transfer-Encoding", "binary");
-      response.addHeader("Access-Control-Allow-Origin", "*");
       response.setContentType(contentType);
       response.setCharacterEncoding("UTF-8");
 
