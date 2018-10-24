@@ -19,34 +19,8 @@ public class DefineExceptionHandler {
 
   private static final Logger logger = LoggerFactory.getLogger(DefineExceptionHandler.class);
 
-
-  @ExceptionHandler(Exception.class)
-  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-  public Map handleException(HttpServletRequest request, HttpServletResponse response, Exception e) {
-    Enumeration<String> headerNames = request.getHeaderNames();
-    StringBuffer bufHeader = new StringBuffer();
-    while (headerNames.hasMoreElements()) {
-      String headerName = headerNames.nextElement();
-      String headerValue = request.getHeader(headerName);
-      bufHeader.append(headerName).append("=").append(headerValue).append(";");
-    }
-    Enumeration<String> parameterNames = request.getParameterNames();
-    StringBuffer bufParam = new StringBuffer();
-    while (parameterNames.hasMoreElements()) {
-      String paramKey = parameterNames.nextElement();
-      String paramValue = request.getHeader(paramKey);
-      bufParam.append(paramKey).append("=").append(paramValue).append(";");
-    }
-    logger.error("Parameter=[{}],Header=[{}]:", bufParam.toString(), bufHeader.toString(), e);
-
-    Map resultDto = new HashMap();
-    resultDto.put("code", 500);
-    resultDto.put("message", "异常信息为:" + e.getMessage());
-    return resultDto;
-  }
-
-
   @ExceptionHandler({Exception.class})
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   public ResponseEntity<String> handler(HttpServletRequest request, HttpServletResponse response, Exception e) {
 
     Enumeration<String> headerNames = request.getHeaderNames();
