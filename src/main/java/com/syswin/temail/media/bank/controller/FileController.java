@@ -81,7 +81,7 @@ public class FileController {
         stoken = StokenHelper.defaultStoken();
       }
       securityToken = new SecurityToken(stoken);
-      checkParam(file == null, file.getSize() <= 0, "file size is error");
+      checkParam(file == null || file.getSize() <= 0, "file size is error");
       fileSize = file.getSize();
       String domain = HttpClientUtils.getDomainByUrl("uploadFile", request);
       Map<String, Object> resultMap = fileService.uploadFile(file, pub, suffix, securityToken.getAppid(), domain);
@@ -130,14 +130,14 @@ public class FileController {
     long fileSize = 0;
     String fileId = null;
     try {
-      checkParam(file == null, file.getSize() <= 0, "file size is error");
+      checkParam(file == null || file.getSize() <= 0, "file size is error");
       fileSize = file.getSize();
       String stoken = request.getHeader("stoken");
       if (!temailAuthVerify.verifySwitch) {
         stoken = StokenHelper.defaultStoken();
       }
       securityToken = new SecurityToken(stoken);
-      checkParam(securityToken == null, securityToken.getAppid() == 0, "no userId found");
+      checkParam(securityToken == null || securityToken.getAppid() == 0, "no userId found");
       String domain = HttpClientUtils.getDomainByUrl("continueUpload", request);
       continueUpload = fileService
           .continueUpload(file, pub, suffix, length, uuid, offset, currentSize,
@@ -152,8 +152,8 @@ public class FileController {
     }
   }
 
-  private void checkParam(boolean b, boolean b2, String s) throws DefineException {
-    if (b || b2) {
+  private void checkParam(boolean b, String s) throws DefineException {
+    if (b) {
       throw new DefineException(ResponseCodeConstants.PARAM_ERROR, s);
     }
   }
