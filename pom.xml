@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.syswin.temail</groupId>
-  <artifactId>media-bank</artifactId>
+  <artifactId>temail-media-bank</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
