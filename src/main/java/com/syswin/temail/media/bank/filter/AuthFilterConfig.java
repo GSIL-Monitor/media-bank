@@ -14,6 +14,9 @@ import com.syswin.temail.media.bank.utils.stoken.SecurityTokenCheckResult;
 import com.syswin.temail.media.bank.utils.stoken.SecurityTokenUtils;
 import com.syswin.temail.media.bank.utils.stoken.StokenHelper;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -72,75 +75,74 @@ public class AuthFilterConfig implements WebMvcConfigurer {
         String action = request.getRequestURI();
         // 只验证stoken
         String stoken = request.getHeader("stoken");
-        if(!temailAuthVerify.getVerifySwitch()){
+        if (!temailAuthVerify.getVerifySwitch()) {
           stoken = StokenHelper.defaultStoken();
         }
-        if (action.equals("/uploadFile")) {
-          if (checkTemailSignature(temailAuthVerify.getUrl(), request)) {
-            if(StringUtils.isBlank(stoken)){
-              throw new DefineException(ResponseCodeConstants.AUTH_ERROR, "please add stoken to header");
-            }
-            SecurityToken securityToken = new SecurityToken(stoken);
-            return authCheck(stoken, securityToken.getAppid(), "");
-          } else {
-            return false;
-          }
-        }
-        if (action.equals("/continueUpload")) {
-          if (checkTemailSignature(temailAuthVerify.getUrl(), request)) {
-            if(StringUtils.isBlank(stoken)){
-              throw new DefineException(ResponseCodeConstants.AUTH_ERROR, "please add stoken to header");
-            }
-            SecurityToken securityToken = new SecurityToken(stoken);
-            int appId = securityToken.getAppid();
-            String uuid = request.getParameter("uuid");
-            if (StringUtils.isNotBlank(uuid) && uuid.length() > 13) {
-              uuid = AESEncrypt.getInstance().decrypt(uuid);
-              String currentTime = uuid.substring(0, 13);
-              if (Long.parseLong(currentTime) > System.currentTimeMillis()) {
-                throw new DefineException(ResponseCodeConstants.PARAM_ERROR,
-                    "file upload time error");
-              }
-              String fileId = uuid.substring(13);
-              fileId = AESEncrypt.getInstance().encrypt(fileId);
-              appId = fileService.getAppIdByFileId(fileId);
-            }
-            return authCheck(stoken, appId, "");
-          } else {
-            return false;
-          }
-        }
-        if (action.equals("/downloadFile")) {
-          String fileId = request.getParameter("fileId");
-          int pub = fileService.getPubByFileId(fileId);
-          if (pub != 1) {
-            response.setHeader("Cache-Control", "private");
-            int appId = fileService.getAppIdByFileId(fileId);
-            return authCheck(stoken, appId, fileId);
-          }
-        }
-      } catch (Exception e) {
-        logger.error("filte error_" + response.getHeader("tMark"), e);
-        response.setStatus(ResponseCodeConstants.SERVER_ERROR);
-        String errorMsg = null;
-        if (e != null) {
-          errorMsg = e.getClass() + ": " + e.getMessage();
-          if (e instanceof DefineException) {
-            DefineException defineException = (DefineException) e;
-            response.setStatus(defineException.getCode());
-            errorMsg = defineException.getMsg();
-          }
-        }
-        out = response.getOutputStream();
-        if (StringUtils.isBlank(errorMsg)) {
-          errorMsg = "error";
-        }
-        out.write(errorMsg.getBytes());
-        return false;
+        checkActionUploadFile(request, action, stoken);
+        checkActionContinueUploadFile(request, action, stoken);
+        checkActionDownloadFile(action, stoken, request, response);
       } finally {
         IOUtils.closeQuietly(out);
       }
       return true;
+    }
+
+    private boolean checkActionDownloadFile(String action, String stoken, HttpServletRequest request,
+        HttpServletResponse response) {
+      if (action.equals("/downloadFile")) {
+        String fileId = request.getParameter("fileId");
+        int pub = fileService.getPubByFileId(fileId);
+        if (pub != 1) {
+          response.setHeader("Cache-Control", "private");
+          int appId = fileService.getAppIdByFileId(fileId);
+          return authCheck(stoken, appId, fileId);
+        }
+      }
+      return true;
+    }
+
+    private Boolean checkActionContinueUploadFile(HttpServletRequest request, String action, String stoken)
+        throws Exception {
+      if (action.equals("/continueUpload")) {
+        if (checkTemailSignature(temailAuthVerify.getUrl(), request)) {
+          if (StringUtils.isBlank(stoken)) {
+            throw new DefineException(ResponseCodeConstants.AUTH_ERROR, "please add stoken to header");
+          }
+          SecurityToken securityToken = new SecurityToken(stoken);
+          int appId = securityToken.getAppid();
+          String uuid = request.getParameter("uuid");
+          if (StringUtils.isNotBlank(uuid) && uuid.length() > 13) {
+            uuid = AESEncrypt.getInstance().decrypt(uuid);
+            String currentTime = uuid.substring(0, 13);
+            if (Long.parseLong(currentTime) > System.currentTimeMillis()) {
+              throw new DefineException(ResponseCodeConstants.PARAM_ERROR,
+                  "file upload time error");
+            }
+            String fileId = uuid.substring(13);
+            fileId = AESEncrypt.getInstance().encrypt(fileId);
+            appId = fileService.getAppIdByFileId(fileId);
+          }
+          return authCheck(stoken, appId, "");
+        } else {
+          return false;
+        }
+      }
+      return null;
+    }
+
+    private Boolean checkActionUploadFile(HttpServletRequest request, String action, String stoken) throws Exception {
+      if (action.equals("/uploadFile")) {
+        if (checkTemailSignature(temailAuthVerify.getUrl(), request)) {
+          if (StringUtils.isBlank(stoken)) {
+            throw new DefineException(ResponseCodeConstants.AUTH_ERROR, "please add stoken to header");
+          }
+          SecurityToken securityToken = new SecurityToken(stoken);
+          return authCheck(stoken, securityToken.getAppid(), "");
+        } else {
+          return false;
+        }
+      }
+      return null;
     }
 
     @Override
@@ -161,8 +163,7 @@ public class AuthFilterConfig implements WebMvcConfigurer {
      * @param fileId
      * @throws Exception
      */
-    public boolean authCheck(String stoken, int appId, String fileId)
-        throws Exception {
+    public boolean authCheck(String stoken, int appId, String fileId) {
       if (StringUtils.isBlank(stoken)) {
         throw new DefineException(ResponseCodeConstants.AUTH_ERROR, "please add stoken to header");
       }
@@ -174,7 +175,11 @@ public class AuthFilterConfig implements WebMvcConfigurer {
         throw new DefineException(ResponseCodeConstants.PARAM_ERROR, "appId invalid");
       }
       String secret = appInfo.getSecurity();
-      r = SecurityTokenUtils.checkSecurityToken(stoken, appId, fileId, authNeed, secret);
+      try {
+        r = SecurityTokenUtils.checkSecurityToken(stoken, appId, fileId, authNeed, secret);
+      } catch (UnsupportedEncodingException | InvalidKeyException | NoSuchAlgorithmException e) {
+        throw new DefineException(ResponseCodeConstants.AUTH_ERROR, "check stoken error");
+      }
       if (r == null) {
         throw new DefineException(ResponseCodeConstants.FORBID_ACCESS_ERROR,
             "The token is a forgery!");
