@@ -7,6 +7,7 @@ import com.syswin.temail.media.bank.config.TemailAuthVerify;
 import com.syswin.temail.media.bank.constants.ResponseCodeConstants;
 import com.syswin.temail.media.bank.exception.DefineException;
 import com.syswin.temail.media.bank.service.FileService;
+import com.syswin.temail.media.bank.service.TokenService;
 import com.syswin.temail.media.bank.utils.AESEncrypt;
 import com.syswin.temail.media.bank.utils.HttpClientUtils;
 import com.syswin.temail.media.bank.utils.stoken.SecurityToken;
@@ -62,6 +63,9 @@ public class AuthFilterConfig implements WebMvcConfigurer {
     @Autowired
     private TemailAuthVerify temailAuthVerify;
 
+    @Autowired
+    private TokenService tokenService;
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
         Object handler)
@@ -75,12 +79,14 @@ public class AuthFilterConfig implements WebMvcConfigurer {
         String action = request.getRequestURI();
         // 只验证stoken
         String stoken = request.getHeader("stoken");
-        if (!temailAuthVerify.getVerifySwitch()) {
+        if(temailAuthVerify.getVerifySwitch()){
+          tokenService.verify(stoken);
+        } else {
           stoken = StokenHelper.defaultStoken();
+          checkActionUploadFile(request, action, stoken);
+          checkActionContinueUploadFile(request, action, stoken);
+          checkActionDownloadFile(action, stoken, request, response);
         }
-        checkActionUploadFile(request, action, stoken);
-        checkActionContinueUploadFile(request, action, stoken);
-        checkActionDownloadFile(action, stoken, request, response);
       } finally {
         IOUtils.closeQuietly(out);
       }
