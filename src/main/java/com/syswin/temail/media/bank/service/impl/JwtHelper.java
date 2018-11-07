@@ -35,7 +35,7 @@ public class JwtHelper implements TokenService{
     try {
       JWTVerifier verifier = JWT.require(Algorithm.HMAC256(key)).build();
       DecodedJWT jwt = verifier.verify(token);
-      String content = jwt.getClaim("user").asString();
+      String content = jwt.getClaim(CLAIMS_KEY).asString();
       // TODO: 2018/11/7 后面需要对比content
       return true;
     } catch (Exception e) {
