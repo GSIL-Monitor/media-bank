@@ -198,7 +198,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
         <configuration>
-          <mainClass>com.syswin.temail.media.bank.FastEmojiApplication</mainClass>
+          <mainClass>com.syswin.temail.media.bank.MediaBankApplication</mainClass>
           <layout>ZIP</layout>
           <executable>true</executable>
           <includes>
