@@ -19,8 +19,11 @@ public class TokenService {
 
   private static final String CLAIMS_KEY = "token";
 
-  @Value("${app.mediabank.jwt.secretkey:syswin}")
-  private String key;
+  private final String key;
+
+  public TokenService(@Value("${app.mediabank.jwt.secretkey:syswin}") String key){
+    this.key = key;
+  }
 
   public String generate(String content) {
     return JWT.create().withClaim(CLAIMS_KEY, content)
