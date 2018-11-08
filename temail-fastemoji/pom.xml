@@ -75,8 +75,8 @@
           <executable>true</executable>
           <includes>
             <include>
-              <groupId>nothing</groupId>
-              <artifactId>nothing</artifactId>
+              <groupId>com.syswin.temail</groupId>
+              <artifactId>temail-media-bank</artifactId>
             </include>
           </includes>
         </configuration>
