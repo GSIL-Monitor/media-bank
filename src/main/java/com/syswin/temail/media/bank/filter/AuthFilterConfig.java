@@ -7,14 +7,13 @@ import com.syswin.temail.media.bank.config.TemailAuthVerify;
 import com.syswin.temail.media.bank.constants.ResponseCodeConstants;
 import com.syswin.temail.media.bank.exception.DefineException;
 import com.syswin.temail.media.bank.service.FileService;
-import com.syswin.temail.media.bank.service.TokenService;
+import com.syswin.temail.media.bank.service.impl.TokenService;
 import com.syswin.temail.media.bank.utils.AESEncrypt;
 import com.syswin.temail.media.bank.utils.HttpClientUtils;
 import com.syswin.temail.media.bank.utils.stoken.SecurityToken;
 import com.syswin.temail.media.bank.utils.stoken.SecurityTokenCheckResult;
 import com.syswin.temail.media.bank.utils.stoken.SecurityTokenUtils;
 import com.syswin.temail.media.bank.utils.stoken.StokenHelper;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -23,7 +22,6 @@ import java.util.List;
 import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,21 +72,17 @@ public class AuthFilterConfig implements WebMvcConfigurer {
       response.setHeader("Access-Control-Allow-Headers", "*");
       response.setHeader("Access-Control-Allow-Origin", "*");
       response.setHeader("tMark", getTMark(request));
-      OutputStream out = null;
-      try {
-        String action = request.getRequestURI();
-        // 只验证stoken
-        String stoken = request.getHeader("stoken");
-        if(temailAuthVerify.getVerifySwitch()){
-          tokenService.verify(stoken);
-        } else {
-          stoken = StokenHelper.defaultStoken();
-          checkActionUploadFile(request, action, stoken);
-          checkActionContinueUploadFile(request, action, stoken);
-          checkActionDownloadFile(action, stoken, request, response);
-        }
-      } finally {
-        IOUtils.closeQuietly(out);
+
+      String action = request.getRequestURI();
+      // 只验证stoken
+      String stoken = request.getHeader("stoken");
+      if (temailAuthVerify.getVerifySwitch()) {
+        tokenService.verify(stoken);
+      } else {
+        stoken = StokenHelper.defaultStoken();
+        checkActionUploadFile(request, action, stoken);
+        checkActionContinueUploadFile(request, action, stoken);
+        checkActionDownloadFile(action, stoken, request, response);
       }
       return true;
     }
