@@ -26,7 +26,7 @@
   <dependencies>
     <dependency>
       <groupId>com.syswin.temail</groupId>
-      <artifactId>temail-media-bank</artifactId>
+      <artifactId>temail-bank-core</artifactId>
     </dependency>
 
   </dependencies>
@@ -75,8 +75,11 @@
           <executable>true</executable>
           <includes>
             <include>
-              <groupId>com.syswin.temail</groupId>
-              <artifactId>temail-media-bank</artifactId>
+              <!--<groupId>com.syswin.temail</groupId>-->
+              <!--<artifactId>temail-media-bank</artifactId>-->
+              <groupId>nothing</groupId>
+              <artifactId>nothing</artifactId>
+
             </include>
           </includes>
         </configuration>
@@ -111,7 +114,7 @@
             </goals>
             <configuration>
               <outputDirectory>${project.build.directory}/libs</outputDirectory>
-              <excludeGroupIds>com.syswin.temail</excludeGroupIds>
+              <!--<excludeGroupIds>com.syswin.temail</excludeGroupIds>-->
               <includeScope>compile</includeScope>
               <includeScope>runtime</includeScope>
             </configuration>
