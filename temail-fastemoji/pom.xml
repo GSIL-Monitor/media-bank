@@ -10,7 +10,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>temail-fastemoji</artifactId>
-
+  <packaging>jar</packaging>
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -22,6 +22,13 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <java.version>1.8</java.version>
+  </properties>
 
   <dependencies>
     <dependency>
@@ -75,11 +82,8 @@
           <executable>true</executable>
           <includes>
             <include>
-              <!--<groupId>com.syswin.temail</groupId>-->
-              <!--<artifactId>temail-media-bank</artifactId>-->
               <groupId>nothing</groupId>
               <artifactId>nothing</artifactId>
-
             </include>
           </includes>
         </configuration>
@@ -114,7 +118,6 @@
             </goals>
             <configuration>
               <outputDirectory>${project.build.directory}/libs</outputDirectory>
-              <!--<excludeGroupIds>com.syswin.temail</excludeGroupIds>-->
               <includeScope>compile</includeScope>
               <includeScope>runtime</includeScope>
             </configuration>
