@@ -70,27 +70,21 @@ public class FileController {
       , @RequestParam(value = "pub", required = false, defaultValue = "1") Integer pub
       , @RequestParam(value = "suffix", required = false) String suffix
       , HttpServletRequest request, HttpServletResponse response) {
-    SecurityToken securityToken = null;
     EnumStateAction state = EnumStateAction.ERROR;
     long beginTime = System.currentTimeMillis();
     long fileSize = 0;
     String fileId = null;
     try {
-      String stoken = request.getHeader("stoken");
-      if (!temailAuthVerify.verifySwitch) {
-        stoken = StokenHelper.defaultStoken();
-      }
-      securityToken = new SecurityToken(stoken);
       checkParam(file == null || file.getSize() <= 0, "file size is error");
       fileSize = file.getSize();
       String domain = HttpClientUtils.getDomainByUrl("uploadFile", request);
-      Map<String, Object> resultMap = fileService.uploadFile(file, pub, suffix, securityToken.getAppid(), domain);
+      Map<String, Object> resultMap = fileService.uploadFile(file, pub, suffix, domain);
       fileId = (String) resultMap.get("fileId");
       state = EnumStateAction.NORMAL;
       return new ResponseEntity<>(resultMap, HttpStatus.OK);
     } finally {
       StorageLogUtils.logAction(new StorageLogDto(EnumLogAction.uploadFile.getCode(), beginTime,
-          fileSize, fileId, securityToken.getAppid(), state.getCode(), response.getHeader("tMark"),
+          fileSize, fileId, state.getCode(), response.getHeader("tMark"),
           request));
     }
   }
@@ -125,29 +119,22 @@ public class FileController {
       , HttpServletRequest request, HttpServletResponse response) {
     EnumStateAction state = EnumStateAction.ERROR;
     long beginTime = System.currentTimeMillis();
-    SecurityToken securityToken = null;
     Map<String, Object> continueUpload = null;
     long fileSize = 0;
     String fileId = null;
     try {
       checkParam(file == null || file.getSize() <= 0, "file size is error");
       fileSize = file.getSize();
-      String stoken = request.getHeader("stoken");
-      if (!temailAuthVerify.verifySwitch) {
-        stoken = StokenHelper.defaultStoken();
-      }
-      securityToken = new SecurityToken(stoken);
-      checkParam(securityToken == null || securityToken.getAppid() == 0, "no userId found");
+
       String domain = HttpClientUtils.getDomainByUrl("continueUpload", request);
       continueUpload = fileService
-          .continueUpload(file, pub, suffix, length, uuid, offset, currentSize,
-              securityToken.getAppid(), domain);
+          .continueUpload(file, pub, suffix, length, uuid, offset, currentSize, domain);
       fileId = continueUpload.get("fileId") == null ? null : (String) continueUpload.get("fileId");
       state = EnumStateAction.NORMAL;
       return continueUpload;
     } finally {
       StorageLogUtils.logAction(new StorageLogDto(EnumLogAction.continueUpload.getCode(), beginTime,
-          fileSize, fileId, securityToken.getAppid(), state.getCode(), response.getHeader("tMark"),
+          fileSize, fileId, state.getCode(), response.getHeader("tMark"),
           request));
     }
   }
@@ -174,12 +161,10 @@ public class FileController {
           String suffix, HttpServletRequest request, HttpServletResponse response) {
     Map<String, Object> resultMap;
     long beginTime = System.currentTimeMillis();
-    Integer userId = 0;
     int length = 0;
     EnumStateAction state = EnumStateAction.ERROR;
     try {
       resultMap = fileService.downloadFile(fileId, suffix);
-      userId = (Integer) resultMap.get("userId");
       String contentType = HttpContentTypeUtils.getMineType(suffix);
       byte[] downloadFile = (byte[]) resultMap.get("file");
       length = downloadFile.length;
@@ -224,7 +209,7 @@ public class FileController {
       state = EnumStateAction.NORMAL;
     } finally {
       StorageLogUtils.logAction(new StorageLogDto(EnumLogAction.download.getCode(), beginTime,
-          length, fileId, userId, state.getCode(), response.getHeader("tMark"), request));
+          length, fileId, state.getCode(), response.getHeader("tMark"), request));
     }
   }
 

@@ -24,8 +24,7 @@ public class FileServiceImpl implements FileService {
   private static final Logger logger = LoggerFactory.getLogger(FileServiceImpl.class);
 
   @Override
-  public Map<String, Object> uploadFile(MultipartFile file, Integer pub, String suffix, int userId,
-      String domain) {
+  public Map<String, Object> uploadFile(MultipartFile file, Integer pub, String suffix, String domain) {
     Map<String, Object> resultMap = new HashMap<>();
     String fileName = file.getOriginalFilename();
     if (StringUtils.isBlank(suffix)) {
@@ -41,8 +40,7 @@ public class FileServiceImpl implements FileService {
       metaList[0] = new NameValuePair("fileName", fileName);
       metaList[1] = new NameValuePair("pub", pub.toString());
       metaList[2] = new NameValuePair("suffix", suffix);
-      metaList[3] = new NameValuePair("userId", userId + "");
-      metaList[4] = new NameValuePair("length", file.getSize() + "");
+      metaList[3] = new NameValuePair("length", file.getSize() + "");
       fileId = client1.upload_file1(file.getBytes(), null, metaList);
       //fileId = client1.upload_file1(file.getBytes(), null, metaList);
       if (fileId == null || fileId.length() == 0) {
@@ -70,7 +68,7 @@ public class FileServiceImpl implements FileService {
   @Override
   public Map<String, Object> continueUpload(MultipartFile file, Integer pub, String suffix,
       Integer length,
-      String uuid, Integer offset, Integer currentSize, int userId, String domain) {
+      String uuid, Integer offset, Integer currentSize, String domain) {
     String fileId;
     String puburl = null;
     String fileName = file.getOriginalFilename();
@@ -94,8 +92,6 @@ public class FileServiceImpl implements FileService {
       metaList[2] = new NameValuePair("suffix", suffix);
       metaList[3] = new NameValuePair("length", length.toString());
       metaList[4] = new NameValuePair("offset", offset.toString());
-      metaList[5] = new NameValuePair("userId", userId + "");
-
       if (StringUtils.isNotBlank(uuid) && !uuid.equals("null")) {
         // 根据uuid解析出时间戳+加密fileId
         uuid = AESEncrypt.getInstance().decrypt(uuid);
