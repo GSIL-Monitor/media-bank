@@ -36,7 +36,7 @@ public class FileServiceImpl implements FileService {
       TrackerClient tracker = new TrackerClient();
       trackerServer = tracker.getConnection();
       StorageClient1 client1 = new StorageClient1(trackerServer, null);
-      NameValuePair[] metaList = new NameValuePair[5];
+      NameValuePair[] metaList = new NameValuePair[4];
       metaList[0] = new NameValuePair("fileName", fileName);
       metaList[1] = new NameValuePair("pub", pub.toString());
       metaList[2] = new NameValuePair("suffix", suffix);
@@ -86,7 +86,7 @@ public class FileServiceImpl implements FileService {
       TrackerClient tracker = new TrackerClient();
       trackerServer = tracker.getConnection();
       StorageClient1 client1 = new StorageClient1(trackerServer, null);
-      NameValuePair[] metaList = new NameValuePair[6];
+      NameValuePair[] metaList = new NameValuePair[5];
       metaList[0] = new NameValuePair("fileName", fileName);
       metaList[1] = new NameValuePair("pub", pub.toString());
       metaList[2] = new NameValuePair("suffix", suffix);
