@@ -204,14 +204,13 @@ public class StorageLogDto {
 	}
 
 	//基本存储日志初始化
-	public StorageLogDto(String action, long beginTime, long fileSize, String fileId, Integer userId, String state, String tMark, HttpServletRequest request){
+	public StorageLogDto(String action, long beginTime, long fileSize, String fileId, String state, String tMark, HttpServletRequest request){
 		this.serverName = "media-bank";
 		this.action = action;
 		this.beginTime = beginTime;
 		this.ip = getIpAddr(request);
 		this.fileSize = fileSize;
 		this.fileId = fileId;
-		this.userId = userId;
 		this.state = state;
 		this.consumedTime = System.currentTimeMillis() - beginTime;
 		this.tMark = tMark;
