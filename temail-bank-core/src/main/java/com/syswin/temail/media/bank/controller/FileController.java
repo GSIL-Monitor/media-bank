@@ -46,13 +46,9 @@ public class FileController {
   @Autowired
   private FileService fileService;
 
-  @Autowired
-  private TemailAuthVerify temailAuthVerify;
-
-
   @ApiOperation(value = "文件直接上传", produces = "application/json;charset=UTF-8")
   @ApiImplicitParams({
-      @ApiImplicitParam(required = true, name = "TeMail", paramType = "header", value = "temail信息", dataType = "string"),
+      @ApiImplicitParam(name = "TeMail", paramType = "header", value = "temail信息", dataType = "string"),
       @ApiImplicitParam(name = "algorithm", paramType = "header", value = "", dataType = "string"),
       @ApiImplicitParam(name = "SIGNATURE", paramType = "header", value = "", dataType = "string"),
       @ApiImplicitParam(name = "UNSIGNED_BYTES", paramType = "header", value = "", dataType = "string"),
@@ -91,7 +87,7 @@ public class FileController {
 
   @ApiOperation(value = "文件分片上传", produces = "application/json;charset=UTF-8")
   @ApiImplicitParams({
-      @ApiImplicitParam(required = true, name = "TeMail", paramType = "header", value = "temail信息", dataType = "string"),
+      @ApiImplicitParam(name = "TeMail", paramType = "header", value = "temail信息", dataType = "string"),
       @ApiImplicitParam(name = "algorithm", paramType = "header", value = "", dataType = "string"),
       @ApiImplicitParam(name = "SIGNATURE", paramType = "header", value = "", dataType = "string"),
       @ApiImplicitParam(name = "UNSIGNED_BYTES", paramType = "header", value = "", dataType = "string"),

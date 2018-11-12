@@ -36,11 +36,11 @@ public class SwaggerFilterConfiguration {
 
     private ApiInfo apiInfo() {
         ApiInfo apiInfo = new ApiInfo(
-                "MediaBank REST API",
+                "MEDIA BANK REST API",
                 "",
                 "version 1.0",
                 "",
-                new Contact("scloud", "", "scloud@syswin.com"),
+                new Contact("服务研发部", "", ""),
                 "",
                 ""
         );
