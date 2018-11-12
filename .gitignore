@@ -38,3 +38,4 @@ dump.rdb
 transaction-logs
 .svn
 .idea
+*.log

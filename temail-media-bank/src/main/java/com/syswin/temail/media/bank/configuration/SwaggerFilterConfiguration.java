@@ -40,7 +40,7 @@ public class SwaggerFilterConfiguration {
                 "",
                 "version 1.0",
                 "",
-                new Contact("scloud", "", "scloud@syswin.com"),
+                new Contact("服务研发部", "", ""),
                 "",
                 ""
         );
