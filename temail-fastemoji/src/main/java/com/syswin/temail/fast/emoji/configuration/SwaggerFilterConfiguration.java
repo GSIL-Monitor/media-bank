@@ -1,4 +1,4 @@
-package com.syswin.temail.media.bank.configuration;
+package com.syswin.temail.fast.emoji.configuration;
 
 import io.swagger.annotations.Api;
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ public class SwaggerFilterConfiguration {
 
     private ApiInfo apiInfo() {
         ApiInfo apiInfo = new ApiInfo(
-                "MediaBank REST API",
+                "FASTEMOJI REST API",
                 "",
                 "version 1.0",
                 "",

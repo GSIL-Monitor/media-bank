@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan("com.syswin.temail")
+@ComponentScan(basePackages = {"com.syswin.temail","com.syswin.temail.fast.emoji"})
 public class FastEmojiApplication {
 
   public static void main(String[] args) {
