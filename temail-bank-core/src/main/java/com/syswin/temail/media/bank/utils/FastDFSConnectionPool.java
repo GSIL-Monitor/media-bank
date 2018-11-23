@@ -20,29 +20,30 @@ public class FastDFSConnectionPool {
 
 	private static final Logger logger = LoggerFactory.getLogger(FastDFSConnectionPool.class);
 	/** 空闲的连接池 */
-	private LinkedBlockingQueue<TrackerServer> idleConnectionPool = null;
+	private static LinkedBlockingQueue<TrackerServer> idleConnectionPool = new LinkedBlockingQueue<TrackerServer>();
 	/** 连接池默认最小连接数 */
-	private long minPoolSize = 30;
+	private static long minPoolSize = 30;
 	/** 连接池默认最大连接数 */
-	private long maxPoolSize = 100;
+	private static long maxPoolSize = 100;
 	/** 当前创建的连接数 */
-	private volatile long nowPoolSize = 0;
+	private static volatile long nowPoolSize = 0;
 	/** 默认等待时间（单位：秒） */
-	private long waitTimes = 200;
+	private static long waitTimes = 200;
 	/** fastdfs客户端创建连接默认1次 */
 	private static final int COUNT = 1;
 
-	public FastDFSConnectionPool(long minPoolSize, long maxPoolSize, long waitTimes) {
+	public FastDFSConnectionPool() {
+
+	}
+	
+	static{
 		String logId = UUID.randomUUID().toString();
 		logger.info("[线程池构造方法(FastDFSConnectionPool)][" + logId + "][默认参数：minPoolSize=" + minPoolSize + ",maxPoolSize="
 				+ maxPoolSize + ",waitTimes=" + waitTimes + "]");
-		this.minPoolSize = minPoolSize;
-		this.maxPoolSize = maxPoolSize;
-		this.waitTimes = waitTimes;
 		/** 初始化连接池 */
 		poolInit(logId);
 		/** 注册心跳 */
-		FastDFSHeartBeat beat = new FastDFSHeartBeat(this);
+		FastDFSHeartBeat beat = new FastDFSHeartBeat(idleConnectionPool);
 		beat.beat();
 	}
 
@@ -52,10 +53,8 @@ public class FastDFSConnectionPool {
 	 *               3).创建最小连接数的连接，并放入到空闲连接池
 	 *
 	 */
-	private void poolInit(String logId) {
+	private static void poolInit(String logId) {
 		try {
-			/** 初始化空闲连接池 */
-			idleConnectionPool = new LinkedBlockingQueue<TrackerServer>();
 			/** 往线程池中添加默认大小的线程 */
 			for (int i = 0; i < minPoolSize; i++) {
 				createTrackerServer(logId, COUNT);
@@ -70,7 +69,7 @@ public class FastDFSConnectionPool {
 	 * @Description: 创建TrackerServer,并放入空闲连接池
 	 *
 	 */
-	public void createTrackerServer(String logId, int flag) {
+	public static void createTrackerServer(String logId, int flag) {
 		logger.info("[创建TrackerServer(createTrackerServer)][" + logId + "]");
 		TrackerServer trackerServer = null;
 		try {
@@ -84,9 +83,7 @@ public class FastDFSConnectionPool {
 			org.csource.fastdfs.ProtoCommon.activeTest(trackerServer.getSocket());
 			idleConnectionPool.add(trackerServer);
 			/** 同一时间只允许一个线程对nowPoolSize操作 **/
-			synchronized (this) {
-				nowPoolSize++;
-			}
+			increase();
 		} catch (Exception e) {
 			logger.error("[创建TrackerServer(createTrackerServer)][" + logId + "][异常：{}]", e);
 		} finally {
@@ -100,6 +97,16 @@ public class FastDFSConnectionPool {
 
 		}
 	}
+	
+	 public static synchronized void increase() {
+		 nowPoolSize ++ ;
+	 }
+	 
+	 public static synchronized void reduce() {
+		 if (nowPoolSize != 0) {
+				nowPoolSize--;
+		 }
+	 }
 
 	/**
 	 * 
@@ -109,7 +116,7 @@ public class FastDFSConnectionPool {
 	 * 
 	 *
 	 */
-	public TrackerServer checkout(String logId) {
+	public static TrackerServer checkout(String logId) {
 		logger.info("[获取空闲连接(checkout)][" + logId + "]");
 		TrackerServer trackerServer = idleConnectionPool.poll();
 		if (trackerServer == null) {
@@ -140,17 +147,13 @@ public class FastDFSConnectionPool {
 	 *            需释放的连接对象
 	 * 
 	 */
-	public void checkin(TrackerServer trackerServer, String logId) {
+	public static void checkin(TrackerServer trackerServer, String logId) {
 		logger.info("[释放当前连接(checkin)][" + logId + "][prams:" + trackerServer + "] ");
 		if (trackerServer != null) {
 			if (idleConnectionPool.size() < minPoolSize) {
 				idleConnectionPool.add(trackerServer);
 			} else {
-				synchronized (this) {
-					if (nowPoolSize != 0) {
-						nowPoolSize--;
-					}
-				}
+				reduce();
 			}
 		}
 
@@ -162,15 +165,11 @@ public class FastDFSConnectionPool {
 	 * @param trackerServer
 	 * 
 	 */
-	public void drop(TrackerServer trackerServer, String logId) {
+	public static void drop(TrackerServer trackerServer, String logId) {
 		logger.info("[删除不可用连接方法(drop)][" + logId + "][parms:" + trackerServer + "] ");
 		if (trackerServer != null) {
 			try {
-				synchronized (this) {
-					if (nowPoolSize != 0) {
-						nowPoolSize--;
-					}
-				}
+				reduce();
 				trackerServer.close();
 			} catch (IOException e) {
 				logger.info("[删除不可用连接方法(drop)--关闭trackerServer异常][" + logId + "][异常：{}]", e);
@@ -178,38 +177,9 @@ public class FastDFSConnectionPool {
 		}
 	}
 
-	public LinkedBlockingQueue<TrackerServer> getIdleConnectionPool() {
+	public static LinkedBlockingQueue<TrackerServer> getIdleConnectionPool() {
 		return idleConnectionPool;
 	}
 
-	public long getMinPoolSize() {
-		return minPoolSize;
-	}
-
-	public void setMinPoolSize(long minPoolSize) {
-		if (minPoolSize != 0) {
-			this.minPoolSize = minPoolSize;
-		}
-	}
-
-	public long getMaxPoolSize() {
-		return maxPoolSize;
-	}
-
-	public void setMaxPoolSize(long maxPoolSize) {
-		if (maxPoolSize != 0) {
-			this.maxPoolSize = maxPoolSize;
-		}
-	}
-
-	public long getWaitTimes() {
-		return waitTimes;
-	}
-
-	public void setWaitTimes(int waitTimes) {
-		if (waitTimes != 0) {
-			this.waitTimes = waitTimes;
-		}
-	}
 
 }

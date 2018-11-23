@@ -20,14 +20,14 @@ public class FastDFSHeartBeat {
 	private static final Logger logger = LoggerFactory.getLogger(FastDFSHeartBeat.class);
 
 	/** fastdfs连接池 */
-	private FastDFSConnectionPool pool = null;
+	private LinkedBlockingQueue<TrackerServer> idleConnectionPool = null;
 	/** 小时毫秒数 */
 	public static int ahour = 1000 * 60 * 60 * 1;
 	/** 等待时间 */
 	public static int waitTimes = 200;
 
-	public FastDFSHeartBeat(FastDFSConnectionPool pool) {
-		this.pool = pool;
+	public FastDFSHeartBeat(LinkedBlockingQueue<TrackerServer> idleConnectionPool) {
+		this.idleConnectionPool = idleConnectionPool;
 	}
 
 	/**
@@ -42,7 +42,6 @@ public class FastDFSHeartBeat {
 			public void run() {
 				String logId = UUID.randomUUID().toString();
 				logger.info("[心跳任务方法（beat）][" + logId + "][Description:对idleConnectionPool中的TrackerServer进行监测]");
-				LinkedBlockingQueue<TrackerServer> idleConnectionPool = pool.getIdleConnectionPool();
 				TrackerServer ts = null;
 				for (int i = 0; i < idleConnectionPool.size(); i++) {
 					try {
@@ -57,7 +56,7 @@ public class FastDFSHeartBeat {
 					} catch (Exception e) {
 						/** 发生异常,要删除，进行重建 */
 						logger.error("[心跳任务方法（beat）][" + logId + "][异常：当前连接已不可用将进行重新获取连接]");
-						pool.drop(ts, logId);
+						FastDFSConnectionPool.drop(ts, logId);
 					}
 				}
 			}
