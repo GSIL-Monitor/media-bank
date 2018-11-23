@@ -23,7 +23,7 @@ public class HttpContentTypeUtils {
 		return t;
 	}
 
-	private static Map<String, String> m = new HashMap();
+	private static Map<String, String> m = new HashMap<String, String>();
 	 
 	static {
 		m.put(".css","text/css");
