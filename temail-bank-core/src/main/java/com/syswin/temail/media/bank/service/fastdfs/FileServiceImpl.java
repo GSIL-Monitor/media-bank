@@ -3,6 +3,7 @@ package com.syswin.temail.media.bank.service.fastdfs;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.csource.common.NameValuePair;
@@ -19,6 +20,7 @@ import com.syswin.temail.media.bank.constants.ResponseCodeConstants;
 import com.syswin.temail.media.bank.exception.DefineException;
 import com.syswin.temail.media.bank.service.FileService;
 import com.syswin.temail.media.bank.utils.AESEncrypt;
+import com.syswin.temail.media.bank.utils.FastDFSConnectionPool;
 
 @Service
 public class FileServiceImpl implements FileService {
@@ -35,8 +37,9 @@ public class FileServiceImpl implements FileService {
     TrackerServer trackerServer = null;
     String fileId = null;
     try {
-      TrackerClient tracker = new TrackerClient();
-      trackerServer = tracker.getConnection();
+//      TrackerClient tracker = new TrackerClient();
+//      trackerServer = tracker.getConnection();
+      trackerServer = FastDFSConnectionPool.checkout(UUID.randomUUID().toString());
       StorageClient1 client1 = new StorageClient1(trackerServer, null);
       NameValuePair[] metaList = new NameValuePair[4];
       metaList[0] = new NameValuePair("fileName", fileName);
