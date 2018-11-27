@@ -37,8 +37,6 @@ public class FileServiceImpl implements FileService {
     TrackerServer trackerServer = null;
     String fileId = null;
     try {
-//      TrackerClient tracker = new TrackerClient();
-//      trackerServer = tracker.getConnection();
       trackerServer = FastDFSConnectionPool.checkout(UUID.randomUUID().toString());
       StorageClient1 client1 = new StorageClient1(trackerServer, null);
       NameValuePair[] metaList = new NameValuePair[4];
@@ -87,8 +85,7 @@ public class FileServiceImpl implements FileService {
     }
     TrackerServer trackerServer = null;
     try {
-      TrackerClient tracker = new TrackerClient();
-      trackerServer = tracker.getConnection();
+      trackerServer = FastDFSConnectionPool.checkout(UUID.randomUUID().toString());
       StorageClient1 client1 = new StorageClient1(trackerServer, null);
       NameValuePair[] metaList = new NameValuePair[5];
       metaList[0] = new NameValuePair("fileName", fileName);
@@ -158,8 +155,7 @@ public class FileServiceImpl implements FileService {
     byte[] result = null;
     TrackerServer trackerServer = null;
     try {
-      TrackerClient tracker = new TrackerClient();
-      trackerServer = tracker.getConnection();
+      trackerServer = FastDFSConnectionPool.checkout(UUID.randomUUID().toString());
       StorageClient1 client1 = new StorageClient1(trackerServer, null);
       NameValuePair[] metadataList = client1.get_metadata1(fileId);
       Integer userId = null;
