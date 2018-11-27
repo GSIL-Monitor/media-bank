@@ -1,11 +1,13 @@
 package com.syswin.temail.media.bank.service.impl;
 
+import java.net.URLEncoder;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Service;
+
 import com.syswin.temail.media.bank.service.DocumentService;
 import com.syswin.temail.media.bank.utils.HttpClientUtils;
-import java.net.URLEncoder;
-import javax.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 @Service
 public class DocumentServiceImpl implements DocumentService {

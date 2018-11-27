@@ -1,30 +1,12 @@
 package com.syswin.temail.media.bank.controller;
 
-import com.syswin.temail.media.bank.bean.Range;
-import com.syswin.temail.media.bank.config.TemailAuthVerify;
-import com.syswin.temail.media.bank.constants.ResponseCodeConstants;
-import com.syswin.temail.media.bank.exception.DefineException;
-import com.syswin.temail.media.bank.service.FileService;
-import com.syswin.temail.media.bank.utils.HttpClientUtils;
-import com.syswin.temail.media.bank.utils.HttpContentTypeUtils;
-import com.syswin.temail.media.bank.utils.logs.EnumLogAction;
-import com.syswin.temail.media.bank.utils.logs.EnumStateAction;
-import com.syswin.temail.media.bank.utils.logs.StorageLogDto;
-import com.syswin.temail.media.bank.utils.logs.StorageLogUtils;
-import com.syswin.temail.media.bank.utils.stoken.SecurityToken;
-import com.syswin.temail.media.bank.utils.stoken.StokenHelper;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +18,25 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.syswin.temail.media.bank.bean.Range;
+import com.syswin.temail.media.bank.constants.ResponseCodeConstants;
+import com.syswin.temail.media.bank.exception.DefineException;
+import com.syswin.temail.media.bank.service.FileService;
+import com.syswin.temail.media.bank.utils.HttpClientUtils;
+import com.syswin.temail.media.bank.utils.HttpContentTypeUtils;
+import com.syswin.temail.media.bank.utils.logs.EnumLogAction;
+import com.syswin.temail.media.bank.utils.logs.EnumStateAction;
+import com.syswin.temail.media.bank.utils.logs.StorageLogDto;
+import com.syswin.temail.media.bank.utils.logs.StorageLogUtils;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 @Api(value = "/", tags = "文件处理接口")
 @RestController

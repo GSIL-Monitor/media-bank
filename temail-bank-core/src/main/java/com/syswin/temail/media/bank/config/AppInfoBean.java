@@ -1,14 +1,15 @@
 package com.syswin.temail.media.bank.config;
 
+import java.util.HashMap;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.systoon.integration.spring.boot.disconf.common.annotation.RefreshScope;
 import com.syswin.temail.media.bank.bean.AppInfo;
-import java.util.HashMap;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.stereotype.Component;
 
 @Component
 //@PropertySource("classpath:appInfo.properties")

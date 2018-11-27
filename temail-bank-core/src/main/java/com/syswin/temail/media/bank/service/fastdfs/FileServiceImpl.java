@@ -1,12 +1,10 @@
 package com.syswin.temail.media.bank.service.fastdfs;
 
-import com.syswin.temail.media.bank.constants.ResponseCodeConstants;
-import com.syswin.temail.media.bank.exception.DefineException;
-import com.syswin.temail.media.bank.service.FileService;
-import com.syswin.temail.media.bank.utils.AESEncrypt;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+
 import org.apache.commons.lang3.StringUtils;
 import org.csource.common.NameValuePair;
 import org.csource.fastdfs.ProtoCommon;
@@ -17,6 +15,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.syswin.temail.media.bank.constants.ResponseCodeConstants;
+import com.syswin.temail.media.bank.exception.DefineException;
+import com.syswin.temail.media.bank.service.FileService;
+import com.syswin.temail.media.bank.utils.AESEncrypt;
+import com.syswin.temail.media.bank.utils.FastDFSConnectionPool;
 
 @Service
 public class FileServiceImpl implements FileService {
@@ -33,8 +37,7 @@ public class FileServiceImpl implements FileService {
     TrackerServer trackerServer = null;
     String fileId = null;
     try {
-      TrackerClient tracker = new TrackerClient();
-      trackerServer = tracker.getConnection();
+      trackerServer = FastDFSConnectionPool.checkout(UUID.randomUUID().toString());
       StorageClient1 client1 = new StorageClient1(trackerServer, null);
       NameValuePair[] metaList = new NameValuePair[4];
       metaList[0] = new NameValuePair("fileName", fileName);
@@ -42,7 +45,6 @@ public class FileServiceImpl implements FileService {
       metaList[2] = new NameValuePair("suffix", suffix);
       metaList[3] = new NameValuePair("length", file.getSize() + "");
       fileId = client1.upload_file1(file.getBytes(), null, metaList);
-      //fileId = client1.upload_file1(file.getBytes(), null, metaList);
       if (fileId == null || fileId.length() == 0) {
         throw new DefineException(ResponseCodeConstants.SERVER_ERROR,
             "file upload error,error code: " + client1.getErrorCode());
@@ -83,8 +85,7 @@ public class FileServiceImpl implements FileService {
     }
     TrackerServer trackerServer = null;
     try {
-      TrackerClient tracker = new TrackerClient();
-      trackerServer = tracker.getConnection();
+      trackerServer = FastDFSConnectionPool.checkout(UUID.randomUUID().toString());
       StorageClient1 client1 = new StorageClient1(trackerServer, null);
       NameValuePair[] metaList = new NameValuePair[5];
       metaList[0] = new NameValuePair("fileName", fileName);
@@ -154,8 +155,7 @@ public class FileServiceImpl implements FileService {
     byte[] result = null;
     TrackerServer trackerServer = null;
     try {
-      TrackerClient tracker = new TrackerClient();
-      trackerServer = tracker.getConnection();
+      trackerServer = FastDFSConnectionPool.checkout(UUID.randomUUID().toString());
       StorageClient1 client1 = new StorageClient1(trackerServer, null);
       NameValuePair[] metadataList = client1.get_metadata1(fileId);
       Integer userId = null;
@@ -175,7 +175,6 @@ public class FileServiceImpl implements FileService {
           continue;
         }
       }
-      int i = 0;
       result = client1.download_file1(fileId);
       if (result == null || result.length == 0) {
         throw new DefineException(ResponseCodeConstants.SERVER_ERROR,
