@@ -13,6 +13,8 @@
     <module>temail-media-bank</module>
     <module>temail-fastemoji</module>
     <module>temail-bank-core</module>
+    <module>temail-ufile</module>
+    <module>temail-aws</module>
   </modules>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

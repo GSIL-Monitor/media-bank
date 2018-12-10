@@ -1,0 +1,5 @@
+aws需要增加两个配置：
+windows:
+将resources中的credentials、config放到C:\Users\用户名\.aws目录下
+Linux, macOS, or Unix：
+将resources中的credentials、config 放到  中的 ~/.aws/ 目录下
