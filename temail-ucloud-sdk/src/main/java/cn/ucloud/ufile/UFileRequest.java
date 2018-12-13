@@ -1,4 +1,4 @@
-package core;
+package cn.ucloud.ufile;
 
 import java.io.File;
 import java.util.HashMap;

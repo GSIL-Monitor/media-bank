@@ -1,7 +1,4 @@
-package test;
-
-import core.UFileRequest;
-import core.UFileSDK;
+package cn.ucloud.ufile;
 
 /**
  * 下载文件测试

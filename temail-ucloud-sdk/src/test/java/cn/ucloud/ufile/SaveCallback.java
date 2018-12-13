@@ -1,6 +1,5 @@
-package test;
+package cn.ucloud.ufile;
 
-import core.Utils;
 import java.io.IOException;
 import okhttp3.Call;
 import okhttp3.Callback;
