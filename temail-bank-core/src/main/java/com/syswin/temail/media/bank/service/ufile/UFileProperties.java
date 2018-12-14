@@ -20,4 +20,5 @@ public class UFileProperties {
   private String cdnHost;
 
   private String tokenPrefix;
+  private boolean compatibleFastdfs = false;
 }

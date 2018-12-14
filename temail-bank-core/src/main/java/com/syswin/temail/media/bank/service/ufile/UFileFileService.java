@@ -5,6 +5,7 @@ import cn.ucloud.ufile.UFileSDK;
 import com.google.gson.Gson;
 import com.syswin.temail.media.bank.exception.DefineException;
 import com.syswin.temail.media.bank.service.FileService;
+import com.syswin.temail.media.bank.service.fastdfs.FileServiceImpl;
 import com.syswin.temail.media.bank.utils.AESEncrypt;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -22,6 +23,8 @@ import okhttp3.Callback;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -31,16 +34,38 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 public class UFileFileService implements FileService {
 
+  private static final Logger fastdfsLog = LoggerFactory
+      .getLogger(UFileFileService.class.getName() + ".CompatibleFastdfs");
   private static final String HTTP_METHOD_PUT = "PUT";
   private static final String HTTP_METHOD_GET = "GET";
+  private static final String DOWNLOAD_FILE = "downloadFile";
+  private static final String UPLOAD_FILE = "uploadFile";
   private UFileSDK ufileSDK;
   private static final Gson GSON = new Gson();
-  private String tokenPrefix;
+  private UFileProperties properties;
   private int timeoutInSeconds = 11; // 由于okhttp默认读写超时时间是10秒，UFileSDK使用了默认的okhttp，因此同步等待时间设置为11秒
 
-  public UFileFileService(UFileSDK ufileSDK, String tokenPrefix) {
-    this.ufileSDK = ufileSDK;
-    this.tokenPrefix = tokenPrefix;
+  private FileServiceImpl fastdfsFileService; // 由于历史原因，兼容fastdfs存储的历史数据，记录访问日志。经检测一段时间没有访问记录后，可关闭对fastdfs的历史数据兼容
+
+  public UFileFileService(UFileProperties properties) {
+    this.properties = properties;
+    this.ufileSDK = ufileSDK(properties);
+    fastdfsFileService = new FileServiceImpl();
+  }
+
+  private UFileSDK ufileSDK(UFileProperties properties) {
+    UFileSDK ufileSDK = new UFileSDK();
+    if (properties.getCdnHost() != null && !properties.getCdnHost().isEmpty()) {
+      ufileSDK.initCDN(properties.getBucket(), properties.getCdnHost(), properties.getPublicKey(),
+          properties.getPrivateKey());
+    } else if (properties.getUpProxySuffix() != null && !properties.getUpProxySuffix().isEmpty()) {
+      ufileSDK.initGlobal(properties.getBucket(), properties.getUpProxySuffix(), properties.getDlProxySuffix(),
+          properties.getPublicKey(), properties.getPrivateKey());
+    } else {
+      ufileSDK.init(properties.getBucket(), properties.getProxySuffix(), properties.getPublicKey(),
+          properties.getPrivateKey());
+    }
+    return ufileSDK;
   }
 
   @Override
@@ -64,13 +89,13 @@ public class UFileFileService implements FileService {
       CountDownLatch latch = new CountDownLatch(1);
       ufileSDK.putStream(request, new SyncCallback(latch, ufileResponse, error), file.getInputStream());
       latch.await(timeoutInSeconds, TimeUnit.SECONDS);
-      Response response = handleResponseError(ufileResponse, error, "uploadFile");
+      Response response = handleResponseError(ufileResponse, error, UPLOAD_FILE);
       Map<String, Object> resultMap = new HashMap<>();
       fileId = AESEncrypt.getInstance().encrypt(fileId);
       resultMap.put("fileId", fileId);
       resultMap.put("pubUrl", domain + fileId + suffix);
       resultMap.put("ETag", response.header("ETag"));
-      log.debug("上传返回结果", resultMap.toString());
+      log.debug("上传返回结果：{}", resultMap);
       return resultMap;
     } catch (DefineException e) {
       throw e;
@@ -82,6 +107,7 @@ public class UFileFileService implements FileService {
   @Override
   public Map<String, Object> downloadFile(String fileId, String suffix) {
     try {
+      String originalFileId = fileId;
       if (fileId.contains(".")) {
         String[] split = fileId.split("\\.");
         fileId = split[0];
@@ -96,13 +122,20 @@ public class UFileFileService implements FileService {
       AtomicReference<Exception> error = new AtomicReference<>();
       ufileSDK.get(request, new SyncCallback(latch, ufileResponse, error));
       latch.await(timeoutInSeconds, TimeUnit.SECONDS);
-      Response response = handleResponseError(ufileResponse, error, "downloadFile");
-      Map<String, Object> resultMap = new HashMap<>();
-      resultMap.put("file", (response.body() != null) ? response.body().bytes() : new byte[0]);
-      resultMap.put("userId", null);
-      resultMap.put("length", response.header("Content-Length"));
-      resultMap.put("contentType", response.header("Content-Type"));
-      resultMap.put("ETag", response.header("ETag"));
+      Response response = handleResponseError(ufileResponse, error, DOWNLOAD_FILE);
+      Map<String, Object> resultMap;
+      if (response.code() == 404 || response.code() == 403) {
+        // 兼容fastdfs存储的历史数据
+        resultMap = fastdfsFileService.downloadFile(originalFileId, suffix);
+        fastdfsLog.info("Got file from fastdfs，fileId={}, sufiix={}", fileId, suffix);
+      } else {
+        resultMap = new HashMap<>();
+        resultMap.put("file", (response.body() != null) ? response.body().bytes() : new byte[0]);
+        resultMap.put("userId", null);
+        resultMap.put("length", response.header("Content-Length"));
+        resultMap.put("contentType", response.header("Content-Type"));
+        resultMap.put("ETag", response.header("ETag"));
+      }
       return resultMap;
     } catch (DefineException e) {
       throw e;
@@ -121,20 +154,23 @@ public class UFileFileService implements FileService {
     if (response == null) {
       throw new DefineException(methodName + " error，timeout:" + timeoutInSeconds + "s");
     }
-    if (response.code() != 200) {
-      String sessionId = response.header("X-SessionId");
-      ResponseBody body = response.body();
-      int errorCode = -1;
-      String errMsg = "unkown error";
-      if (body != null) {
-        UFileErrorResponse errorResponse = GSON.fromJson(body.string(), UFileErrorResponse.class);
-        errorCode = errorResponse.getRetCode();
-        errMsg = errorResponse.getErrMsg();
-      }
-      throw new DefineException(
-          methodName + " error，X-SessionId=" + sessionId + "，RetCode=" + errorCode + ", ErrMsg=" + errMsg);
+
+    if (response.code() == 200 ||
+        (properties.isCompatibleFastdfs() && DOWNLOAD_FILE.equals(methodName) &&
+            (response.code() == 404 || response.code() == 403))) {
+      return response;
     }
-    return response;
+    String sessionId = response.header("X-SessionId");
+    ResponseBody body = response.body();
+    int errorCode = -1;
+    String errMsg = "unkown error";
+    if (body != null) {
+      UFileErrorResponse errorResponse = GSON.fromJson(body.string(), UFileErrorResponse.class);
+      errorCode = errorResponse.getRetCode();
+      errMsg = errorResponse.getErrMsg();
+    }
+    throw new DefineException(
+        methodName + " error，X-SessionId=" + sessionId + "，RetCode=" + errorCode + ", ErrMsg=" + errMsg);
   }
 
   private String getNowString() {
@@ -152,7 +188,7 @@ public class UFileFileService implements FileService {
   }
 
   private String genFileId() {
-    return tokenPrefix + "/" + UUID.randomUUID().toString();
+    return properties.getTokenPrefix() + "/" + UUID.randomUUID().toString();
   }
 
   @Data
