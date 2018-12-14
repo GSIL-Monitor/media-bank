@@ -39,6 +39,11 @@
         <artifactId>temail-bank-core</artifactId>
         <version>1.0.2-SNAPSHOT</version>
       </dependency>
+      <dependency>
+        <groupId>com.syswin.temail</groupId>
+        <artifactId>temail-ucloud-sdk</artifactId>
+        <version>1.0.2-SNAPSHOT</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
