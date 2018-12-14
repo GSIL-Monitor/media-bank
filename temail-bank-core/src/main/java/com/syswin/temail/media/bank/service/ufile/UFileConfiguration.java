@@ -12,14 +12,14 @@ import org.springframework.context.annotation.Configuration;
  * @date 2018-12-12
  */
 @Configuration
-@ConditionalOnProperty(value = "app.mediabank.dfs", havingValue = "ufile")
 @EnableConfigurationProperties(UFileProperties.class)
 @Slf4j
 public class UFileConfiguration {
 
   @Bean
+  @ConditionalOnProperty(value = "app.mediabank.dfs", havingValue = "ufile")
   public UFileFileService fileService(UFileProperties properties) {
-    log.info("------------------------------This mediabank use UFile as storage!------------------------------");
+    log.info("------------------------------This mediabank use UFile storage!------------------------------");
     return new UFileFileService(ufileSDK(properties), properties.getTokenPrefix());
   }
 
