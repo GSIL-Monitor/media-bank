@@ -18,18 +18,19 @@ import org.csource.fastdfs.TrackerClient;
 import org.csource.fastdfs.TrackerServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
-@ConditionalOnProperty(value = "app.mediabank.dfs", havingValue = "fastdfs", matchIfMissing = true)
+@Profile("fastdfs")
+//@ConditionalOnProperty(value = "app.mediabank.dfs", havingValue = "fastdfs", matchIfMissing = true)
 public class FileServiceImpl implements FileService {
 
   private static final Logger logger = LoggerFactory.getLogger(FileServiceImpl.class);
 
   @PostConstruct
-  public void logDefine(){
+  public void logDefine() {
     logger.info("------------------------------This mediabank use fastdfs storage!------------------------------");
   }
 
