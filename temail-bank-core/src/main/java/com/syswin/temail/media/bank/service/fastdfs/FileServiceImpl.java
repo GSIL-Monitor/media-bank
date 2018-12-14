@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.csource.common.NameValuePair;
 import org.csource.fastdfs.ProtoCommon;
@@ -26,6 +27,11 @@ import org.springframework.web.multipart.MultipartFile;
 public class FileServiceImpl implements FileService {
 
   private static final Logger logger = LoggerFactory.getLogger(FileServiceImpl.class);
+
+  @PostConstruct
+  public void logDefine(){
+    logger.info("------------------------------This mediabank use fastdfs storage!------------------------------");
+  }
 
   @Override
   public Map<String, Object> uploadFile(MultipartFile file, Integer pub, String suffix, String domain) {
