@@ -1,4 +1,4 @@
-package core;
+package cn.ucloud.ufile;
 
 import java.io.BufferedInputStream;
 import java.io.File;

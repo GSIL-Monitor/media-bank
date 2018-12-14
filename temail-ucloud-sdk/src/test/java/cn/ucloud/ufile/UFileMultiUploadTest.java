@@ -1,9 +1,6 @@
-package test;
+package cn.ucloud.ufile;
 
 import com.google.gson.Gson;
-import core.InitMultiBody;
-import core.UFileRequest;
-import core.UFileSDK;
 import java.io.File;
 import java.io.IOException;
 import okhttp3.Headers;
@@ -26,7 +23,8 @@ public class UFileMultiUploadTest {
   private static String filePath = "e:\\toon\\toon.exe";
 
   public static void main(String args[]) {
-    String configPath = System.getProperty("user.dir") + "\\temail-ufile\\src\\main\\resources\\config.properties";
+    String configPath = ClassLoader.getSystemResource("config.properties").getFile();
+    // System.getProperty("user.dir") + "\\temail-ufile\\src\\main\\resources\\config.properties";
     ufileSDK = new UFileSDK();
     ufileSDK.loadConfig(configPath);
 

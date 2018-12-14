@@ -1,24 +1,22 @@
-package test;
+package cn.ucloud.ufile;
 
-import core.UFileRequest;
-import core.UFileSDK;
 
 /**
- * 秒传测试，秒传是指如果UFile系统中含有待上传文件，则瞬间完成上传
+ * Post上传测试
  *
  * @author michael
  */
-public class UFileUploadHitTest {
+public class UFilePostTest {
 
   public static void main(String args[]) {
-    String configPath = "";
+    String configPath = System.getProperty("user.dir") + "\\temail-ufile\\src\\main\\resources\\config.properties";
 
     String httpMethod = "POST";
-    String key = "";
-    String contentType = "";
+    String key = "mediabank/test22.txt";
+    String contentType = "multipart/form-data";
     String contentMD5 = "";
     String date = "";
-    String filePath = "";
+    String filePath = "E:\\22.txt";
 
     UFileRequest request = new UFileRequest();
     request.setHttpMethod(httpMethod);
@@ -32,7 +30,7 @@ public class UFileUploadHitTest {
     ufileSDK.loadConfig(configPath);
 
     System.out.println("[Request]\n");
-    ufileSDK.uploadHit(request, new PrintCallback());
+    ufileSDK.post(request, new PrintCallback());
 
     UFileSDK.shutdown();
   }

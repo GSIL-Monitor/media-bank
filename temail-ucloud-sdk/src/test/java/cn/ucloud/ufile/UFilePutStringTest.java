@@ -1,22 +1,18 @@
-package test;
-
-
-import core.UFileRequest;
-import core.UFileSDK;
+package cn.ucloud.ufile;
 
 /**
- * Head 请求测试
+ * Put上传测试
  *
  * @author michael
  */
-public class UFileHeadTest {
+public class UFilePutStringTest {
 
   public static void main(String args[]) {
     String configPath = "";
 
-    String httpMethod = "HEAD";
+    String httpMethod = "PUT";
     String key = "";
-    String contentType = "";
+    String contentType = "text/plain; charset=utf-8";
     String contentMD5 = "";
     String date = "";
 
@@ -31,7 +27,8 @@ public class UFileHeadTest {
     ufileSDK.loadConfig(configPath);
 
     System.out.println("[Request]\n");
-    ufileSDK.head(request, new PrintCallback());
+    String testStr = "put-string-stream-test \r\n  www.ucloud.cn \r\n 优刻得 优秀是通过刻苦努力得到的";
+    ufileSDK.putString(request, new PrintCallback(), testStr);
 
     UFileSDK.shutdown();
   }

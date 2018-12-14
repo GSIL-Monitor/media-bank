@@ -1,10 +1,14 @@
 package com.syswin.temail.media.bank.service.fastdfs;
 
+import com.syswin.temail.media.bank.constants.ResponseCodeConstants;
+import com.syswin.temail.media.bank.exception.DefineException;
+import com.syswin.temail.media.bank.service.FileService;
+import com.syswin.temail.media.bank.utils.AESEncrypt;
+import com.syswin.temail.media.bank.utils.FastDFSConnectionPool;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-
 import org.apache.commons.lang3.StringUtils;
 import org.csource.common.NameValuePair;
 import org.csource.fastdfs.ProtoCommon;
@@ -13,16 +17,12 @@ import org.csource.fastdfs.TrackerClient;
 import org.csource.fastdfs.TrackerServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.syswin.temail.media.bank.constants.ResponseCodeConstants;
-import com.syswin.temail.media.bank.exception.DefineException;
-import com.syswin.temail.media.bank.service.FileService;
-import com.syswin.temail.media.bank.utils.AESEncrypt;
-import com.syswin.temail.media.bank.utils.FastDFSConnectionPool;
-
 @Service
+@ConditionalOnProperty(value = "app.mediabank.dfs", havingValue = "fastdfs", matchIfMissing = true)
 public class FileServiceImpl implements FileService {
 
   private static final Logger logger = LoggerFactory.getLogger(FileServiceImpl.class);

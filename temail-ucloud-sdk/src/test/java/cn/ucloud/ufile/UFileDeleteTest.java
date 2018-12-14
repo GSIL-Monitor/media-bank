@@ -1,26 +1,22 @@
-package test;
+package cn.ucloud.ufile;
 
-import core.UFileRequest;
-import core.UFileSDK;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 
 /**
- * Put上传测试
+ * 删除文件测试
  *
  * @author michael
  */
-public class UFilePutSteamTest {
+public class UFileDeleteTest {
 
   public static void main(String args[]) {
-    String configPath = "";
 
-    String httpMethod = "PUT";
-    String key = "";
+    String configPath = System.getProperty("user.dir") + "\\temail-ufile\\src\\main\\resources\\config.properties";
+
+    String httpMethod = "DELETE";
+    String key = "mediabank/test";
     String contentType = "";
     String contentMD5 = "";
     String date = "";
-    String filePath = "";
 
     UFileRequest request = new UFileRequest();
     request.setHttpMethod(httpMethod);
@@ -33,11 +29,7 @@ public class UFilePutSteamTest {
     ufileSDK.loadConfig(configPath);
 
     System.out.println("[Request]\n");
-    try {
-      ufileSDK.putStream(request, new PrintCallback(), new FileInputStream(filePath));
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-    }
+    ufileSDK.delete(request, new PrintCallback());
 
     UFileSDK.shutdown();
   }

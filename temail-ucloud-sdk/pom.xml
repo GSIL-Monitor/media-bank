@@ -9,7 +9,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>temail-ufile</artifactId>
+  <artifactId>temail-ucloud-sdk</artifactId>
   <dependencies>
     <dependency>
       <groupId>com.squareup.okhttp3</groupId>

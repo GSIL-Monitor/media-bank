@@ -1,4 +1,4 @@
-package test;
+package cn.ucloud.ufile;
 
 import java.io.IOException;
 import okhttp3.*;

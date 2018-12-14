@@ -1,4 +1,4 @@
-package core;
+package cn.ucloud.ufile;
 
 /**
  * 分片初始化类

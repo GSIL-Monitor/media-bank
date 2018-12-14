@@ -13,7 +13,7 @@
     <module>temail-media-bank</module>
     <module>temail-fastemoji</module>
     <module>temail-bank-core</module>
-    <module>temail-ufile</module>
+    <module>temail-ucloud-sdk</module>
     <module>temail-aws</module>
   </modules>
   <properties>

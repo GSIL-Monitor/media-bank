@@ -1,7 +1,4 @@
-package test;
-
-import core.UFileRequest;
-import core.UFileSDK;
+package cn.ucloud.ufile;
 
 /**
  * Put上传测试
@@ -11,14 +8,13 @@ import core.UFileSDK;
 public class UFilePutTest {
 
   public static void main(String args[]) {
-    String configPath = System.getProperty("user.dir") + "\\temail-ufile\\src\\main\\resources\\config.properties";
-    //String configPath = UFilePutTest.class.getClassLoader().getResource("config.properties").toString();
+    String configPath = ClassLoader.getSystemResource("config.properties").getFile();
     String httpMethod = "PUT";
     String key = "mediabank/test";
     String contentType = "text/plain; charset=utf-8";
     String contentMD5 = "";
     String date = "20181205";
-    String filePath = "D:\\test.txt";
+    String filePath = "D:/test.txt";
 
     UFileRequest request = new UFileRequest();
     request.setHttpMethod(httpMethod);
