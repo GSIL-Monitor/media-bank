@@ -1,6 +1,7 @@
 package com.syswin.temail.media.bank.service.ufile;
 
 import cn.ucloud.ufile.UFileSDK;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -13,10 +14,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConditionalOnProperty(value = "app.mediabank.dfs", havingValue = "ufile")
 @EnableConfigurationProperties(UFileProperties.class)
+@Slf4j
 public class UFileConfiguration {
 
   @Bean
   public UFileFileService fileService(UFileProperties properties) {
+    log.info("------------------------------This mediabank use UFile as storage!------------------------------");
     return new UFileFileService(ufileSDK(properties), properties.getTokenPrefix());
   }
 
