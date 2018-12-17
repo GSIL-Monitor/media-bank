@@ -1,11 +1,14 @@
 package com.syswin.temail.media.bank.service.ufile;
 
+import static com.syswin.temail.media.bank.constants.ResponseCodeConstants.FORBID_ACCESS_ERROR;
+import static com.syswin.temail.media.bank.constants.ResponseCodeConstants.NOT_FOUND_ERROR;
+import static com.syswin.temail.media.bank.constants.ResponseCodeConstants.SUCCESS;
+
 import cn.ucloud.ufile.UFileRequest;
 import cn.ucloud.ufile.UFileSDK;
 import com.google.gson.Gson;
 import com.syswin.temail.media.bank.exception.DefineException;
 import com.syswin.temail.media.bank.service.FileService;
-import com.syswin.temail.media.bank.service.fastdfs.FileServiceImpl;
 import com.syswin.temail.media.bank.utils.AESEncrypt;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -23,8 +26,6 @@ import okhttp3.Callback;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -34,8 +35,6 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 public class UFileFileService implements FileService {
 
-  private static final Logger fastdfsLog = LoggerFactory
-      .getLogger(UFileFileService.class.getName() + ".CompatibleFastdfs");
   private static final String HTTP_METHOD_PUT = "PUT";
   private static final String HTTP_METHOD_GET = "GET";
   private static final String DOWNLOAD_FILE = "downloadFile";
@@ -45,12 +44,9 @@ public class UFileFileService implements FileService {
   private UFileProperties properties;
   private int timeoutInSeconds = 11; // 由于okhttp默认读写超时时间是10秒，UFileSDK使用了默认的okhttp，因此同步等待时间设置为11秒
 
-  private FileServiceImpl fastdfsFileService; // 由于历史原因，兼容fastdfs存储的历史数据，记录访问日志。经检测一段时间没有访问记录后，可关闭对fastdfs的历史数据兼容
-
   public UFileFileService(UFileProperties properties) {
     this.properties = properties;
     this.ufileSDK = ufileSDK(properties);
-    fastdfsFileService = new FileServiceImpl();
   }
 
   private UFileSDK ufileSDK(UFileProperties properties) {
@@ -107,7 +103,6 @@ public class UFileFileService implements FileService {
   @Override
   public Map<String, Object> downloadFile(String fileId, String suffix) {
     try {
-      String originalFileId = fileId;
       if (fileId.contains(".")) {
         String[] split = fileId.split("\\.");
         fileId = split[0];
@@ -123,19 +118,12 @@ public class UFileFileService implements FileService {
       ufileSDK.get(request, new SyncCallback(latch, ufileResponse, error));
       latch.await(timeoutInSeconds, TimeUnit.SECONDS);
       Response response = handleResponseError(ufileResponse, error, DOWNLOAD_FILE);
-      Map<String, Object> resultMap;
-      if (response.code() == 404 || response.code() == 403) {
-        // 兼容fastdfs存储的历史数据
-        resultMap = fastdfsFileService.downloadFile(originalFileId, suffix);
-        fastdfsLog.info("Got file from fastdfs，fileId={}, sufiix={}", fileId, suffix);
-      } else {
-        resultMap = new HashMap<>();
-        resultMap.put("file", (response.body() != null) ? response.body().bytes() : new byte[0]);
-        resultMap.put("userId", null);
-        resultMap.put("length", response.header("Content-Length"));
-        resultMap.put("contentType", response.header("Content-Type"));
-        resultMap.put("ETag", response.header("ETag"));
-      }
+      Map<String, Object> resultMap = new HashMap<>();
+      resultMap.put("file", (response.body() != null) ? response.body().bytes() : new byte[0]);
+      resultMap.put("userId", null);
+      resultMap.put("length", response.header("Content-Length"));
+      resultMap.put("contentType", response.header("Content-Type"));
+      resultMap.put("ETag", response.header("ETag"));
       return resultMap;
     } catch (DefineException e) {
       throw e;
@@ -155,11 +143,10 @@ public class UFileFileService implements FileService {
       throw new DefineException(methodName + " error，timeout:" + timeoutInSeconds + "s");
     }
 
-    if (response.code() == 200 ||
-        (properties.isCompatibleFastdfs() && DOWNLOAD_FILE.equals(methodName) &&
-            (response.code() == 404 || response.code() == 403))) {
+    if (response.code() == SUCCESS) {
       return response;
     }
+
     String sessionId = response.header("X-SessionId");
     ResponseBody body = response.body();
     int errorCode = -1;
@@ -169,8 +156,13 @@ public class UFileFileService implements FileService {
       errorCode = errorResponse.getRetCode();
       errMsg = errorResponse.getErrMsg();
     }
-    throw new DefineException(
-        methodName + " error，X-SessionId=" + sessionId + "，RetCode=" + errorCode + ", ErrMsg=" + errMsg);
+    String msg = methodName + " error，X-SessionId=" + sessionId + "，RetCode=" + errorCode + ", ErrMsg=" + errMsg;
+    if (DOWNLOAD_FILE.equals(methodName) &&
+        (response.code() == FORBID_ACCESS_ERROR || response.code() == NOT_FOUND_ERROR)) {
+      throw new DefineException(response.code(), msg);
+    } else {
+      throw new DefineException(msg);
+    }
   }
 
   private String getNowString() {

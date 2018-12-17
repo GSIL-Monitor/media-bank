@@ -31,7 +31,6 @@ public class UFileFileServiceTest {
   private static final String DOMAIN = "http://www.systoon.com/";
   private String tokenPrefix = "mediabank";
   private UFileFileService fileService;
-  private boolean compatibleFastdfs = false;
 
   @Before
   public void init() throws IOException {
@@ -46,7 +45,6 @@ public class UFileFileServiceTest {
     fileProperties.setUpProxySuffix(properties.getProperty("GlobalUploadProxySuffix"));
     fileProperties.setCdnHost(properties.getProperty("CDNHost"));
     fileProperties.setTokenPrefix(tokenPrefix);
-    fileProperties.setCompatibleFastdfs(compatibleFastdfs);
     fileService = new UFileFileService(fileProperties);
   }
 
@@ -108,12 +106,6 @@ public class UFileFileServiceTest {
         contentType, fileContent);
     String suffix = ".txt";
     fileService.uploadFile(file, 0, suffix, DOMAIN);
-  }
-
-  @Test
-  public void testCompatibleFastdfs() throws IOException, MyException {
-    compatibleFastdfs = true;
-    testIncompatibleFastdfs();
   }
 
   @Test(expected = DefineException.class)

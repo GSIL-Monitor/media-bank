@@ -34,7 +34,7 @@
       <appender-ref ref="CONSOLE"/>
       <appender-ref ref="Async"/>
     </root>
-    <logger name="com.syswin.temail.media.bank.service.ufile.UFileFileService.CompatibleFastdfs" level="info">
+    <logger name="com.syswin.temail.media.bank.service.ufile.UFileCompatibleFastdfsService" level="info">
       <appender-ref ref="CompatibleFastdfs"/>
     </logger>
   </loggers>
