@@ -72,7 +72,7 @@ public class DocumentController {
     }
 
     private void checkUrl(@RequestParam String fileUrl) throws DefineException {
-        if(!HttpClientUtils.checkUrl(fileUrl)){
+        if(HttpClientUtils.isInvalidUrl(fileUrl)){
             throw new DefineException(ResponseCodeConstants.PARAM_ERROR, "fileUrl error");
         }
     }

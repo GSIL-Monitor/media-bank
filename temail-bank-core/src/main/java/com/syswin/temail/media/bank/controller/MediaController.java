@@ -58,7 +58,7 @@ public class MediaController {
         long beginTime = System.currentTimeMillis();
         EnumStateAction state = EnumStateAction.ERROR;
         try {
-            if(!HttpClientUtils.checkUrl(fileUrl)){
+            if(HttpClientUtils.isInvalidUrl(fileUrl)){
                 throw new DefineException(ResponseCodeConstants.PARAM_ERROR, "fileUrl error");
             }
             if(StringUtils.isBlank(suffix)){

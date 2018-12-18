@@ -62,7 +62,7 @@ public class ImageController {
         long beginTime = System.currentTimeMillis();
         EnumStateAction state = EnumStateAction.ERROR;
         try {
-            if(!HttpClientUtils.checkUrl(fileUrl)){
+            if(HttpClientUtils.isInvalidUrl(fileUrl)){
                 throw new DefineException(ResponseCodeConstants.PARAM_ERROR, "fileUrl error");
             }
             if (mode < 0 || mode > 2) {
@@ -115,7 +115,7 @@ public class ImageController {
         long beginTime = System.currentTimeMillis();
         EnumStateAction state = EnumStateAction.ERROR;
         try {
-            if(!HttpClientUtils.checkUrl(fileUrl)){
+            if(HttpClientUtils.isInvalidUrl(fileUrl)){
                 throw new DefineException(ResponseCodeConstants.PARAM_ERROR, "fileUrl error");
             }
             fileUrl = URLDecoder.decode(fileUrl, "UTF-8");
