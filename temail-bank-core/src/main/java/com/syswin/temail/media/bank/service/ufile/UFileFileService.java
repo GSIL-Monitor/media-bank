@@ -6,6 +6,7 @@ import static com.syswin.temail.media.bank.constants.ResponseCodeConstants.SUCCE
 
 import cn.ucloud.ufile.UFileRequest;
 import cn.ucloud.ufile.UFileSDK;
+import cn.ucloud.ufile.Utils;
 import com.google.gson.Gson;
 import com.syswin.temail.media.bank.exception.DefineException;
 import com.syswin.temail.media.bank.service.FileService;
@@ -78,7 +79,7 @@ public class UFileFileService implements FileService {
         suffix = (fileName != null && fileName.contains(".")) ? fileName.substring(fileName.lastIndexOf(".")) : "";
       }
 
-      String fileId = genFileId();
+      String fileId = genFileId() + suffix;
       UFileRequest request = new UFileRequest();
       request.setHttpMethod(HTTP_METHOD_PUT);
       request.setKey(fileId);
@@ -94,7 +95,8 @@ public class UFileFileService implements FileService {
       handleResponseError(ufileResponse, error, UPLOAD_FILE);
       Map<String, Object> resultMap = new HashMap<>();
       resultMap.put("fileId", fileId);
-      resultMap.put("pubUrl", domain + fileId + suffix);
+      // 直接从UFile服务下载，不经过MediaBank转发
+      resultMap.put("pubUrl", ufileSDK.getDlHost() + "/" + Utils.urlEncode(fileId));
       log.debug("上传返回结果：{}", resultMap);
       return resultMap;
     } catch (DefineException e) {
@@ -107,11 +109,6 @@ public class UFileFileService implements FileService {
   @Override
   public Map<String, Object> downloadFile(String fileId, String suffix) {
     try {
-      if (fileId.contains(".")) {
-        String[] split = fileId.split("\\.");
-        fileId = split[0];
-      }
-
       UFileRequest request = new UFileRequest();
       request.setHttpMethod(HTTP_METHOD_GET);
       request.setKey(fileId);
@@ -183,7 +180,7 @@ public class UFileFileService implements FileService {
   }
 
   private String genFileId() {
-    return properties.getTokenPrefix() + "/" + UUID.randomUUID().toString();
+    return properties.getTokenPrefix() + "/" + UUID.randomUUID().toString().replaceAll("-", "");
   }
 
   @Data

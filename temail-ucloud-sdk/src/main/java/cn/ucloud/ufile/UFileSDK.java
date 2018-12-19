@@ -482,4 +482,8 @@ public class UFileSDK {
     return client;
   }
 
+  public String getDlHost() {
+    return dlHost;
+  }
+
 }

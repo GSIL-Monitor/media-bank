@@ -13,7 +13,12 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.entity.ContentType;
+import org.apache.http.impl.client.HttpClients;
 import org.csource.common.MyException;
 import org.csource.fastdfs.ClientGlobal;
 import org.junit.Before;
@@ -31,6 +36,7 @@ public class UFileFileServiceTest {
   private static final String DOMAIN = "http://www.systoon.com/";
   private String tokenPrefix = "mediabank";
   private UFileFileService fileService;
+  private HttpClient httpClient;
 
   @Before
   public void init() throws IOException {
@@ -46,6 +52,9 @@ public class UFileFileServiceTest {
     fileProperties.setCdnHost(properties.getProperty("CDNHost"));
     fileProperties.setTokenPrefix(tokenPrefix);
     fileService = new UFileFileService(fileProperties);
+    if (httpClient == null) {
+      httpClient = HttpClients.createDefault();
+    }
   }
 
   public void detroy() {
@@ -77,6 +86,38 @@ public class UFileFileServiceTest {
     assertEquals(fileContent.length, downloadLength);
     assertArrayEquals(fileContent, downloadData);
     assertEquals(uploadETag, downloadETag);
+  }
+
+  @Test
+  public void testUploadAndPubDownloadSuccess() throws IOException {
+    byte[] fileContent = "This is file content!".getBytes();
+    String contentType = ContentType.TEXT_PLAIN.getMimeType();
+    String filename = "/test/data.txt";
+    MultipartFile file = new MockMultipartFile("testUpload", filename,
+        contentType, fileContent);
+    String suffix = ".txt";
+    Map<String, Object> uploadMap = fileService.uploadFile(file, 0, suffix, DOMAIN);
+    String fileId = String.valueOf(uploadMap.get("fileId"));
+    String pubUrl = String.valueOf(uploadMap.get("pubUrl"));
+    String uploadETag = String.valueOf(uploadMap.get("ETag"));
+    assertNotNull("pubUrl is null", pubUrl);
+    assertNotNull("eTag is null", uploadETag);
+
+    HttpGet request = new HttpGet(pubUrl);
+    HttpResponse response = httpClient.execute(request);
+    assertEquals(200, response.getStatusLine().getStatusCode());
+    byte[] downloadData = IOUtils.toByteArray(response.getEntity().getContent());
+    long downloadLength =response.getEntity().getContentLength();
+    assertEquals(fileContent.length, downloadLength);
+    assertArrayEquals(fileContent, downloadData);
+//
+//    Map<String, Object> downloadMap = fileService.downloadFile(fileId, suffix);
+//    byte[] downloadData = (byte[]) downloadMap.get("file");
+//    int downloadLength = Integer.parseInt(String.valueOf(downloadMap.get("length")));
+//    String downloadETag = String.valueOf(uploadMap.get("ETag"));
+//    assertEquals(fileContent.length, downloadLength);
+//    assertArrayEquals(fileContent, downloadData);
+//    assertEquals(uploadETag, downloadETag);
   }
 
   @Test(expected = DefineException.class)
