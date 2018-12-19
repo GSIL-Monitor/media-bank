@@ -9,8 +9,8 @@ import cn.ucloud.ufile.UFileSDK;
 import com.google.gson.Gson;
 import com.syswin.temail.media.bank.exception.DefineException;
 import com.syswin.temail.media.bank.service.FileService;
-import com.syswin.temail.media.bank.utils.AESEncrypt;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -51,22 +51,28 @@ public class UFileFileService implements FileService {
 
   private UFileSDK ufileSDK(UFileProperties properties) {
     UFileSDK ufileSDK = new UFileSDK();
-    if (properties.getCdnHost() != null && !properties.getCdnHost().isEmpty()) {
-      ufileSDK.initCDN(properties.getBucket(), properties.getCdnHost(), properties.getPublicKey(),
-          properties.getPrivateKey());
-    } else if (properties.getUpProxySuffix() != null && !properties.getUpProxySuffix().isEmpty()) {
-      ufileSDK.initGlobal(properties.getBucket(), properties.getUpProxySuffix(), properties.getDlProxySuffix(),
-          properties.getPublicKey(), properties.getPrivateKey());
+    String bucket = properties.getBucket();
+    String publicKey = properties.getPublicKey();
+    String privateKey = properties.getPrivateKey();
+    String cdnHost = properties.getCdnHost();
+    if (cdnHost != null && !cdnHost.isEmpty()) {
+      ufileSDK.initCDN(bucket, cdnHost, publicKey, privateKey);
     } else {
-      ufileSDK.init(properties.getBucket(), properties.getProxySuffix(), properties.getPublicKey(),
-          properties.getPrivateKey());
+      String upProxySuffix = properties.getUpProxySuffix();
+      if (upProxySuffix != null && !upProxySuffix.isEmpty()) {
+        String dlProxySuffix = properties.getDlProxySuffix();
+        ufileSDK.initGlobal(bucket, upProxySuffix, dlProxySuffix, publicKey, privateKey);
+      } else {
+        String proxySuffix = properties.getProxySuffix();
+        ufileSDK.init(bucket, proxySuffix, publicKey, privateKey);
+      }
     }
     return ufileSDK;
   }
 
   @Override
   public Map<String, Object> uploadFile(MultipartFile file, Integer pub, String suffix, String domain) {
-    try {
+    try (InputStream inputStream = file.getInputStream()) {
       String fileName = file.getOriginalFilename();
       if (StringUtils.isBlank(suffix)) {
         suffix = (fileName != null && fileName.contains(".")) ? fileName.substring(fileName.lastIndexOf(".")) : "";
@@ -83,14 +89,12 @@ public class UFileFileService implements FileService {
       AtomicReference<Exception> error = new AtomicReference<>();
       AtomicReference<Response> ufileResponse = new AtomicReference<>();
       CountDownLatch latch = new CountDownLatch(1);
-      ufileSDK.putStream(request, new SyncCallback(latch, ufileResponse, error), file.getInputStream());
+      ufileSDK.putStream(request, new SyncCallback(latch, ufileResponse, error), inputStream);
       latch.await(timeoutInSeconds, TimeUnit.SECONDS);
-      Response response = handleResponseError(ufileResponse, error, UPLOAD_FILE);
+      handleResponseError(ufileResponse, error, UPLOAD_FILE);
       Map<String, Object> resultMap = new HashMap<>();
-      fileId = AESEncrypt.getInstance().encrypt(fileId);
       resultMap.put("fileId", fileId);
       resultMap.put("pubUrl", domain + fileId + suffix);
-      resultMap.put("ETag", response.header("ETag"));
       log.debug("上传返回结果：{}", resultMap);
       return resultMap;
     } catch (DefineException e) {
@@ -107,7 +111,6 @@ public class UFileFileService implements FileService {
         String[] split = fileId.split("\\.");
         fileId = split[0];
       }
-      fileId = AESEncrypt.getInstance().decrypt(fileId);
 
       UFileRequest request = new UFileRequest();
       request.setHttpMethod(HTTP_METHOD_GET);
