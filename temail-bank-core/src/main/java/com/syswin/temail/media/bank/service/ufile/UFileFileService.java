@@ -96,7 +96,7 @@ public class UFileFileService implements FileService {
       Map<String, Object> resultMap = new HashMap<>();
       resultMap.put("fileId", fileId);
       // 直接从UFile服务下载，不经过MediaBank转发
-      resultMap.put("pubUrl", ufileSDK.getDlHost() + "/" + Utils.urlEncode(fileId));
+      resultMap.put("pubUrl", properties.getDownloadDomain() + "/" + Utils.urlEncode(fileId));
       log.debug("上传返回结果：{}", resultMap);
       return resultMap;
     } catch (DefineException e) {

@@ -21,4 +21,5 @@ public class UFileProperties {
 
   private String tokenPrefix;
   private boolean compatibleFastdfs = false;
+  private String downloadDomain;
 }
