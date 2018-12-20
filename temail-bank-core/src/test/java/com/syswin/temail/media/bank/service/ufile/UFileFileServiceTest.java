@@ -51,6 +51,7 @@ public class UFileFileServiceTest {
     fileProperties.setUpProxySuffix(properties.getProperty("GlobalUploadProxySuffix"));
     fileProperties.setCdnHost(properties.getProperty("CDNHost"));
     fileProperties.setTokenPrefix(tokenPrefix);
+    fileProperties.setDownloadDomain("http://temail-test.cn-bj.ufileos.com");
     fileService = new UFileFileService(fileProperties);
     if (httpClient == null) {
       httpClient = HttpClients.createDefault();
