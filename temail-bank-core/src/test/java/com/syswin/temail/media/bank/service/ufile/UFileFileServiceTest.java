@@ -97,7 +97,6 @@ public class UFileFileServiceTest {
         contentType, fileContent);
     String suffix = ".txt";
     Map<String, Object> uploadMap = fileService.uploadFile(file, 0, suffix, DOMAIN);
-    String fileId = String.valueOf(uploadMap.get("fileId"));
     String pubUrl = String.valueOf(uploadMap.get("pubUrl"));
     String uploadETag = String.valueOf(uploadMap.get("ETag"));
     assertNotNull("pubUrl is null", pubUrl);
@@ -110,14 +109,6 @@ public class UFileFileServiceTest {
     long downloadLength =response.getEntity().getContentLength();
     assertEquals(fileContent.length, downloadLength);
     assertArrayEquals(fileContent, downloadData);
-//
-//    Map<String, Object> downloadMap = fileService.downloadFile(fileId, suffix);
-//    byte[] downloadData = (byte[]) downloadMap.get("file");
-//    int downloadLength = Integer.parseInt(String.valueOf(downloadMap.get("length")));
-//    String downloadETag = String.valueOf(uploadMap.get("ETag"));
-//    assertEquals(fileContent.length, downloadLength);
-//    assertArrayEquals(fileContent, downloadData);
-//    assertEquals(uploadETag, downloadETag);
   }
 
   @Test(expected = DefineException.class)
