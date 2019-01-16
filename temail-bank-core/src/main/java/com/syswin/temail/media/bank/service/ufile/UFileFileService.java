@@ -153,8 +153,13 @@ public class UFileFileService implements FileService {
     String errMsg = "unkown error";
     if (body != null) {
       UFileErrorResponse errorResponse = GSON.fromJson(body.string(), UFileErrorResponse.class);
-      errorCode = errorResponse.getRetCode();
-      errMsg = errorResponse.getErrMsg();
+      if (errorResponse != null) {
+        errorCode = errorResponse.getRetCode();
+        errMsg = errorResponse.getErrMsg();
+      }
+      else{
+        errMsg = GSON.toJson(response);
+      }
     }
     String msg = methodName + " error，X-SessionId=" + sessionId + "，RetCode=" + errorCode + ", ErrMsg=" + errMsg;
     if (DOWNLOAD_FILE.equals(methodName) &&
