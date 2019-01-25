@@ -26,10 +26,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -50,6 +55,33 @@ public class AuthFilterConfig implements WebMvcConfigurer {
     registry.addInterceptor(authInterceptor()).excludePathPatterns(excludeUrl);
   }
 
+  @Override
+  public void addCorsMappings(CorsRegistry registry) {
+    //设置允许跨域的路径
+    registry.addMapping("/**")
+            //设置允许跨域请求的域名
+            .allowedOrigins("*")
+            //是否允许证书 不再默认开启
+            .allowCredentials(true)
+            //设置允许的方法
+            .allowedMethods("*")
+            //跨域允许时间
+            .maxAge(3600);
+  }
+  @Bean
+  public FilterRegistrationBean corsFilter() {
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    CorsConfiguration config = new CorsConfiguration();
+    config.setAllowCredentials(true);
+    config.addAllowedOrigin("*");
+    config.addAllowedHeader("*");
+    config.addAllowedMethod("*");
+    source.registerCorsConfiguration("/**", config);
+    FilterRegistrationBean bean = new FilterRegistrationBean(new CorsFilter(source));
+    bean.setOrder(0);
+    return bean;
+  }
+
   public class AuthInterceptor implements HandlerInterceptor {
 
     @Autowired
@@ -63,6 +95,8 @@ public class AuthFilterConfig implements WebMvcConfigurer {
 
     @Autowired
     private TokenService tokenService;
+
+
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
