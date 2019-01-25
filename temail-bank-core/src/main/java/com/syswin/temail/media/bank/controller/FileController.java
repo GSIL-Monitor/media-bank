@@ -37,7 +37,6 @@ import io.swagger.annotations.ApiResponses;
 
 @Api(value = "/", tags = "文件处理接口")
 @RestController
-@CrossOrigin
 public class FileController {
 
   private static final Logger logger = LoggerFactory.getLogger(FileController.class);
